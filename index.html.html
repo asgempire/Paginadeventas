@@ -1,0 +1,3216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASG Empire - Innovación y Futuro en Cada Producto</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Poppins (headings) & Inter (body) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Expose Firebase modules globally for use in the main script
+        window.firebase = { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp };
+    </script>
+    <style>
+        /* Estilos Base - Moderno, Oscuro y Limpio */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Fondo oscuro principal */
+            color: #e2e8f0; /* Texto claro */
+            line-height: 1.6;
+            scroll-behavior: smooth;
+            overflow-x: hidden; /* Evita el desplazamiento horizontal */
+        }
+
+        /* Clase general para ocultar elementos */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Estilo General del Contenedor */
+        .container {
+            max-width: 1300px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 2rem;
+        }
+
+        /* Estilo del Encabezado (Header) */
+        .header {
+            background-color: #2d3748; /* Encabezado oscuro */
+            color: #e2e8f0;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom-left-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+            display: flex;
+            flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+            justify-content: space-between; /* Distribuye los elementos */
+            align-items: center;
+            gap: 1rem; /* Espacio entre elementos del header */
+        }
+        .header .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: #6366f1; /* Azul-violeta primario */
+            cursor: pointer;
+            transition: color 0.3s ease;
+            flex-shrink: 0;
+            /* Removed margin: 0 auto; to align left */
+        }
+        .header .logo:hover {
+            color: #4f46e5;
+        }
+        .header .header-nav {
+            display: flex;
+            gap: 1rem;
+        }
+        .header .nav-link {
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-weight: 500;
+            color: #cbd5e0; /* Texto de navegación más claro */
+        }
+        .header .nav-link:hover {
+            background-color: #4a5568; /* Fondo más oscuro al pasar el ratón */
+            color: #6366f1;
+        }
+        .header .cart-icon-btn {
+            background: none;
+            border: none;
+            color: #6366f1; /* Azul-violeta primario */
+            font-size: 1.6rem;
+            cursor: pointer;
+            position: relative;
+            padding: 0.5rem;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+        .header .cart-icon-btn:hover {
+            color: #4f46e5;
+            transform: scale(1.1);
+        }
+        .header .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ef4444; /* Insignia roja */
+            color: white;
+            border-radius: 50%;
+            padding: 0.2em 0.5em;
+            font-size: 0.7rem;
+            font-weight: 700;
+            line-height: 1;
+            transform: translate(30%, -30%);
+            min-width: 1.5em;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Search bar specific styles */
+        .header-search-container {
+            display: flex; /* Always display */
+            flex-grow: 1; /* Allow it to grow */
+            max-width: 400px; /* Max width for desktop */
+        }
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem 0 0 0.5rem;
+            background-color: #1a202c;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+        }
+        .search-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            background-color: #6366f1;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .search-btn:hover {
+            background-color: #4f46e5;
+        }
+
+
+        /* Estilo para la Sombra de Texto */
+        .text-shadow-lg {
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); /* Sombra más oscura para el tema oscuro */
+        }
+
+        /* Encabezado de Sección */
+        .section-heading {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #e2e8f0; /* Texto claro */
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+        }
+        .section-heading::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: #6366f1; /* Azul-violeta primario */
+            margin: 1rem auto 0;
+            border-radius: 2px;
+        }
+
+        /* Botones Generales */
+        .btn {
+            padding: 0.8rem 1.8rem;
+            border: none;
+            border-radius: 0.6rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Añadido box-shadow */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra base */
+        }
+        .btn:hover {
+            transform: translateY(-3px); /* Efecto de levantamiento */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Sombra más grande al pasar el ratón */
+        }
+        .btn-primary {
+            background-color: #6366f1; /* Azul-violeta primario */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4f46e5;
+        }
+        .btn-secondary {
+            background-color: #4a5568; /* Fondo oscuro para botón secundario */
+            color: #e2e8f0; /* Texto claro */
+        }
+        .btn-secondary:hover {
+            background-color: #6366f1; /* Fondo de hover con color primario */
+            color: white;
+        }
+        .btn-icon {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #a0aec0;
+            padding: 0.6rem;
+            border-radius: 0.5rem;
+            transition: color 0.2s ease, transform 0.2s ease, background-color 0.2s ease, box-shadow 0.3s ease; /* Añadido box-shadow */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra base para iconos */
+        }
+        .btn-icon:hover {
+            color: #e2e8f0;
+            background-color: #4a5568;
+            transform: translateY(-2px); /* Efecto de levantamiento */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra más grande al pasar el ratón */
+        }
+
+
+        /* Tarjetas de Características */
+        .feature-card {
+            background-color: #2d3748; /* Fondo oscuro para las tarjetas */
+            padding: 2.5rem;
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #4a5568; /* Borde más oscuro */
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+        }
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1.5rem;
+            color: #6366f1; /* Azul-violeta primario */
+        }
+        .feature-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #e2e8f0; /* Texto claro */
+            margin-bottom: 0.8rem;
+        }
+        .feature-description {
+            color: #cbd5e0; /* Texto más claro */
+            font-size: 1rem;
+        }
+
+        /* Tarjetas de Producto */
+        .product-card {
+            background-color: #2d3748; /* Fondo oscuro para las tarjetas de producto */
+            padding: 1.5rem;
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            border: 1px solid #4a5568;
+            position: relative;
+            overflow: hidden;
+            min-height: 450px; /* Added min-height to ensure buttons are always visible */
+        }
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+            border-color: #6366f1;
+        }
+        .product-image-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 75%; /* Relación de aspecto 4:3 (300/400) */
+            margin-bottom: 1rem;
+            border-radius: 0.8rem;
+            overflow: hidden;
+        }
+        .product-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+        .wishlist-icon {
+            position: absolute;
+            top: 0.8rem;
+            right: 0.8rem;
+            background-color: rgba(45, 55, 72, 0.8); /* Fondo oscuro semi-transparente */
+            border-radius: 50%;
+            padding: 0.6rem;
+            font-size: 1.2rem;
+            color: #a0aec0; /* Corazón gris por defecto */
+            cursor: pointer;
+            transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 5;
+        }
+        .wishlist-icon.active {
+            color: #ef4444; /* Corazón rojo cuando está activo */
+            background-color: rgba(239, 68, 68, 0.2); /* Fondo rojo más suave */
+            transform: scale(1.1);
+        }
+        .wishlist-icon:hover {
+            transform: scale(1.2);
+        }
+        .product-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #e2e8f0; /* Texto claro */
+            margin-bottom: 0.5rem;
+        }
+        .product-price {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #6366f1; /* Azul-violeta primario */
+            margin-bottom: 0.8rem;
+        }
+        .product-rating {
+            color: #f6ad55; /* Estrellas naranjas */
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+        }
+        .product-review-snippet {
+            font-size: 0.85rem;
+            color: #cbd5e0; /* Texto más claro */
+            margin-bottom: 1rem;
+            max-height: 3.8em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        .add-to-cart-btn {
+            background-color: #6366f1; /* Azul-violeta primario */
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 0.6rem;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .add-to-cart-btn:hover {
+            background-color: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        .view-details-btn {
+            background-color: #4a5568; /* Color secundario para "Ver Detalles" */
+            color: #e2e8f0;
+            padding: 0.8rem 1.8rem;
+            border-radius: 0.6rem;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-top: 0.5rem; /* Espacio entre botones */
+            width: 100%; /* Ocupa todo el ancho disponible */
+        }
+        .view-details-btn:hover {
+            background-color: #6366f1; /* Cambio a color primario en hover */
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+
+        /* Estilos para el Carrusel de Próximas Ventas */
+        .upcoming-sales-carousel {
+            position: relative;
+            height: 400px; /* Altura para el carrusel de próximas ventas */
+            margin-bottom: 4rem;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+            background-color: #2d3748; /* Fondo oscuro */
+        }
+        .upcoming-sale-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            text-align: center;
+            padding: 2rem;
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+        .upcoming-sale-slide.active {
+            opacity: 1;
+        }
+        .upcoming-sale-content {
+            background: rgba(0, 0, 0, 0.6); /* Superposición para el texto */
+            padding: 2rem 3rem;
+            border-radius: 1rem;
+            max-width: 800px;
+        }
+        .upcoming-sale-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        .upcoming-sale-description {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            color: #cbd5e0;
+        }
+        .upcoming-sale-cta {
+            background-color: #6366f1;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .upcoming-sale-cta:hover {
+            background-color: #4f46e5;
+            transform: translateY(-2px);
+        }
+        /* Reutilizando estilos de navegación de carrusel */
+        .carousel-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.6); /* Botones de navegación más oscuros */
+            color: white;
+            padding: 1rem;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s ease;
+        }
+        .carousel-nav-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .carousel-nav-btn.left { left: 1.5rem; }
+        .carousel-nav-btn.right { right: 1.5rem; }
+        .carousel-dots {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.8rem;
+            z-index: 10;
+        }
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.4); /* Puntos más sutiles */
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .carousel-dot.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        /* Nueva Sección: Ventajas Exclusivas */
+        .advantages-section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        .advantage-card {
+            background-color: #2d3748; /* Fondo oscuro para las tarjetas */
+            padding: 2.5rem;
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            border: 1px solid #4a5568;
+        }
+        .advantage-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+            border-color: #6366f1;
+        }
+        .advantage-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: #4facfe; /* Azul brillante para iconos de ventaja */
+        }
+        .advantage-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 0.8rem;
+        }
+        .advantage-description {
+            color: #cbd5e0;
+            font-size: 1rem;
+        }
+
+
+        /* Sección de Preguntas Frecuentes (FAQ) */
+        .faq-item {
+            background-color: #2d3748; /* Fondo oscuro para FAQ */
+            padding: 1.5rem 2rem;
+            border-radius: 0.8rem;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            border: 1px solid #4a5568;
+            transition: all 0.3s ease;
+        }
+        .faq-item:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-color: #6366f1;
+        }
+        .faq-question {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: #e2e8f0; /* Texto claro */
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        .faq-answer {
+            color: #cbd5e0; /* Texto más claro */
+            margin-top: 1rem;
+            display: none;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            padding-top: 0.8rem;
+            border-top: 1px dashed #4a5568; /* Borde más oscuro */
+        }
+        .faq-answer.active {
+            display: block;
+        }
+        .faq-toggle-icon {
+            transition: transform 0.3s ease;
+            color: #6366f1;
+            font-size: 1.3rem;
+        }
+        .faq-toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* Pie de Página (Footer) */
+        footer {
+            background-color: #0d121c; /* Fondo aún más oscuro para el pie de página */
+            color: white;
+            padding: 3rem 2rem;
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+            margin-top: 4rem;
+            text-align: center;
+            box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.3);
+        }
+        footer .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #6366f1;
+        }
+        footer .footer-links a {
+            color: #a0aec0; /* Enlaces más claros */
+            text-decoration: none;
+            transition: color 0.3s ease;
+            margin: 0 0.8rem;
+            font-weight: 500;
+        }
+        footer .footer-links a:hover {
+            color: #6366f1;
+        }
+        footer .social-icons a {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 0.6rem;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+        footer .social-icons a:hover {
+            color: #6366f1;
+            transform: translateY(-3px);
+        }
+
+        /* Estilos de Modales - Centrados y Mejorados */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85); /* Superposición aún más oscura */
+            backdrop-filter: blur(10px); /* Desenfoque más fuerte */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: #2d3748; /* Fondo oscuro para modales */
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); /* Sombra más oscura */
+            max-width: 500px; /* Ancho máximo por defecto para modales */
+            width: 90%;
+            text-align: left;
+            transform: translateY(-30px) scale(0.9);
+            transition: transform 0.4s ease-in-out, background-color 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+            border: 1px solid #4a5568;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0) scale(1);
+        }
+        .modal-content h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: #e2e8f0; /* Texto claro */
+            text-align: center;
+        }
+        .modal-content p.modal-description {
+            color: #cbd5e0; /* Texto más claro */
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+        .modal-form-group {
+            margin-bottom: 1.2rem; /* Margen inferior por defecto para grupos de formulario */
+        }
+        .modal-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #cbd5e0; /* Texto claro */
+            font-size: 0.95rem;
+        }
+        .modal-form-group input, .modal-form-group textarea, .modal-form-group select { /* Añadido select */
+            width: 100%;
+            padding: 0.9rem;
+            border: 1px solid #4a5568; /* Borde más oscuro */
+            border-radius: 0.6rem;
+            font-size: 0.95rem;
+            background-color: #1a202c; /* Fondo oscuro para inputs */
+            color: #e2e8f0; /* Texto claro en inputs */
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .modal-form-group input:focus, .modal-form-group textarea:focus, .modal-form-group select:focus { /* Añadido select */
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4); /* Sombra de enfoque más oscura */
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.8rem;
+            gap: 1rem;
+        }
+        .modal-buttons .btn {
+            padding: 0.8rem 1.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 0.6rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .modal-buttons .btn-primary {
+            background-color: #6366f1;
+            color: white;
+        }
+        .modal-buttons .btn-primary:hover {
+            background-color: #4f46e5;
+            transform: translateY(-2px);
+        }
+        .modal-buttons .btn-secondary {
+            background-color: #4a5568; /* Fondo oscuro para botón secundario */
+            color: #e2e8f0; /* Texto claro */
+        }
+        .modal-buttons .btn-secondary:hover {
+            background-color: #6366f1; /* Fondo de hover con color primario */
+            color: white;
+            transform: translateY(-2px);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #a0aec0;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .modal-close-btn:hover {
+            color: #e2e8f0;
+            transform: rotate(90deg);
+        }
+
+        /* Especificaciones del Modal del Carrito */
+        #cartModal .modal-content, #itemAddedModal .modal-content {
+            max-width: 600px; /* Mantener el ancho del carrito y el modal de añadir artículo */
+        }
+        /* Ajuste específico para el modal de Confirmación de Compra */
+        #purchaseConfirmModal .modal-content {
+            max-width: 550px; /* Hacemos este modal más ancho */
+            padding: 2rem; /* Reducimos el padding para hacerlo más corto visualmente */
+        }
+        #purchaseConfirmModal .modal-form-group {
+            margin-bottom: 1rem; /* Reducimos el margen entre los grupos de formulario */
+        }
+
+        /* Estilos para el Modal de Detalles del Producto */
+        #productDetailModal .modal-content {
+            max-width: 900px; /* Aumentado para acomodar dos columnas */
+            width: 90%;
+            height: auto;
+            max-height: 90%;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column; /* Por defecto para móviles */
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        #productDetailModal .product-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Una columna por defecto para móviles */
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) { /* Dos columnas para pantallas más grandes */
+            #productDetailModal .product-detail-grid {
+                grid-template-columns: 1fr 1.5fr; /* Columna izquierda para imagen, derecha para detalles */
+            }
+            #productDetailModal .product-detail-left-column {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        #productDetailModal .product-detail-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 1.5rem; /* Espacio antes de la descripción */
+        }
+        #productDetailModal .product-detail-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+        #productDetailModal .product-detail-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #e2e8f0;
+            margin-bottom: 0.5rem;
+        }
+        #productDetailModal .product-detail-price {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #6366f1;
+            margin-bottom: 1rem;
+        }
+        #productDetailModal .product-detail-description {
+            color: #cbd5e0;
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+        #productDetailModal .product-detail-specs ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.8rem;
+        }
+        #productDetailModal .product-detail-specs li {
+            background-color: #1a202c;
+            padding: 0.8rem 1rem;
+            border-radius: 0.6rem;
+            border: 1px solid #4a5568;
+            font-size: 0.9rem;
+            color: #a0aec0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        #productDetailModal .product-detail-specs li i {
+            color: #6366f1;
+        }
+
+        /* Estilos para la sección de Reseñas */
+        .reviews-section {
+            background-color: #1a202c;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #4a5568;
+            margin-top: 2rem;
+        }
+        .reviews-section h4 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .reviews-list {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 10px; /* Espacio para la barra de desplazamiento */
+        }
+        .review-item {
+            background-color: #2d3748;
+            padding: 1rem;
+            border-radius: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #4a5568;
+        }
+        .review-item strong {
+            color: #6366f1;
+            font-weight: 600;
+        }
+        .review-item .rating-stars {
+            color: #f6ad55;
+            font-size: 0.9rem;
+            margin-left: 0.5rem;
+        }
+        .review-item p {
+            color: #cbd5e0;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        .add-review-form {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed #4a5568;
+        }
+        .add-review-form .modal-form-group {
+            margin-bottom: 1rem;
+        }
+        .add-review-form .btn-primary {
+            width: 100%;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            padding: 0.8rem;
+            background-color: #1a202c; /* Fondo oscuro para elementos del carrito */
+            border-radius: 0.8rem;
+            border: 1px solid #4a5568;
+        }
+        .cart-item-image {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            margin-right: 1rem;
+        }
+        .cart-item-details {
+            flex-grow: 1;
+        }
+        .cart-item-details h4 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0; /* Texto claro */
+            margin-bottom: 0.2rem;
+        }
+        .cart-item-details p {
+            font-size: 0.85rem;
+            color: #cbd5e0; /* Texto más claro */
+        }
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .cart-item-actions input {
+            background-color: #1a202c; /* Fondo oscuro para input de cantidad */
+            color: #e2e8f0; /* Texto claro */
+            border: 1px solid #4a5568;
+        }
+        .cart-item-actions button {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.4rem 0.7rem;
+            border-radius: 0.4rem;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
+        }
+        .cart-item-actions button:hover {
+            background-color: #dc2626;
+        }
+        .cart-total {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e2e8f0; /* Texto claro */
+            text-align: right;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #4a5568; /* Borde más oscuro */
+        }
+        .empty-cart-message {
+            text-align: center;
+            color: #a0aec0;
+            padding: 1.5rem;
+            font-size: 1rem;
+        }
+
+        /* Modal de Confirmación de Artículo Añadido */
+        #itemAddedModal .modal-content {
+            text-align: center;
+            padding: 2rem;
+        }
+        #itemAddedModal .modal-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        #itemAddedModal .modal-content p {
+            font-size: 1rem;
+            color: #cbd5e0; /* Texto más claro */
+            margin-bottom: 1.5rem;
+        }
+        #itemAddedModal .modal-content .modal-buttons {
+            justify-content: center;
+        }
+
+        /* Estilos para el carrusel de imágenes del producto en el modal */
+        .product-image-carousel {
+            position: relative;
+            width: 100%;
+            max-width: 500px; /* Nuevo: Ancho máximo para el carrusel */
+            margin: 0 auto; /* Nuevo: Centrar el carrusel */
+            padding-bottom: 75%; /* Aspect ratio 4:3 */
+            overflow: hidden;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            background-color: #1a202c;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+        .product-image-carousel .carousel-slides-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .product-image-carousel .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .product-image-carousel .carousel-slide.active {
+            opacity: 1;
+        }
+        .product-image-carousel .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Changed to contain to show full image, not crop */
+        }
+        .product-image-carousel .carousel-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s ease;
+        }
+        .product-image-carousel .carousel-nav-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        .product-image-carousel .carousel-nav-btn.left { left: 0.8rem; }
+        .product-image-carousel .carousel-nav-btn.right { right: 0.8rem; }
+        .product-image-carousel .carousel-dots {
+            position: absolute;
+            bottom: 0.8rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+        .product-image-carousel .carousel-dot {
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .product-image-carousel .carousel-dot.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        /* Quantity Selector Specific Styles */
+        .quantity-selector-group {
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed #4a5568;
+        }
+        .quantity-selector-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #cbd5e0;
+        }
+        .quantity-selector-group input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
+            appearance: textfield; /* Chrome, Safari, Edge */
+        }
+        .quantity-selector-group input[type="number"]::-webkit-inner-spin-button,
+        .quantity-selector-group input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .quantity-selector-group .btn-icon {
+            font-size: 1.5rem;
+            padding: 0.3rem;
+        }
+
+
+        /* Ajustes Responsivos */
+        @media (max-width: 767px) { /* Para pantallas pequeñas (menos de 768px) */
+            .header {
+                flex-direction: column; /* Apila elementos verticalmente */
+                align-items: center; /* Centra los elementos */
+                padding: 0.8rem 1rem;
+            }
+            .header .logo {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem; /* Espacio debajo del logo */
+            }
+            .header .header-search-container {
+                width: 100%; /* Ocupa todo el ancho disponible */
+                margin-bottom: 0.5rem; /* Espacio debajo de la barra de búsqueda */
+            }
+            .header .header-nav {
+                width: 100%; /* Ocupa todo el ancho disponible */
+                justify-content: center; /* Centra los enlaces de navegación */
+                margin-bottom: 0.5rem; /* Espacio debajo de los enlaces */
+                gap: 0.6rem;
+            }
+            .header .cart-icon-btn {
+                font-size: 1.4rem;
+                margin-top: 0.5rem; /* Espacio encima del botón del carrito */
+            }
+            .header .nav-link {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+            .section-heading {
+                font-size: 2.2rem;
+            }
+            .feature-card {
+                padding: 2rem;
+            }
+            .feature-title {
+                font-size: 1.4rem;
+            }
+            .product-card {
+                padding: 1.2rem;
+            }
+            .product-title {
+                font-size: 1.2rem;
+            }
+            .product-price {
+                font-size: 1.1rem;
+            }
+            .product-review-snippet {
+                font-size: 0.8rem;
+            }
+            .add-to-cart-btn {
+                font-size: 0.9rem;
+                padding: 0.7rem 1.5rem;
+            }
+            .view-details-btn {
+                font-size: 0.9rem;
+                padding: 0.7rem 1.5rem;
+            }
+            .upcoming-sales-carousel {
+                height: 300px; /* Ajuste de altura para móviles */
+            }
+            .upcoming-sale-title {
+                font-size: 2rem;
+            }
+            .upcoming-sale-description {
+                font-size: 1rem;
+            }
+            .upcoming-sale-content {
+                padding: 1.5rem 2rem;
+            }
+            .faq-item {
+                padding: 1.2rem 1.5rem;
+            }
+            .faq-question {
+                font-size: 1rem;
+            }
+            .modal-content {
+                padding: 1.8rem;
+            }
+            #productDetailModal .modal-content {
+                padding: 1.5rem;
+                max-width: 95%; /* Ajustado para ser más ancho en móviles */
+                height: 95%; /* Ajustado para ser más alto en móviles */
+            }
+            #productDetailModal .product-detail-title {
+                font-size: 1.8rem;
+            }
+            #productDetailModal .product-detail-price {
+                font-size: 1.5rem;
+            }
+            #productDetailModal .product-detail-description {
+                font-size: 0.9rem;
+            }
+            #productDetailModal .product-detail-specs li {
+                font-size: 0.8rem;
+            }
+            .reviews-section h4 {
+                font-size: 1.2rem;
+            }
+            .modal-content h3 {
+                font-size: 1.6rem;
+            }
+            .modal-buttons {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            .modal-buttons .btn {
+                width: 100%;
+            }
+        }
+
+        /* Botón Volver Arriba */
+        #backToTopBtn {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #backToTopBtn:hover {
+            background-color: #4f46e5;
+            transform: translateY(-5px);
+        }
+        #backToTopBtn.show {
+            display: flex;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Encabezado -->
+    <header class="header">
+        <!-- Logo en la izquierda -->
+        <a href="#" class="logo" id="headerLogo">ASG Empire</a>
+
+        <!-- Barra de búsqueda en el centro -->
+        <div class="header-search-container">
+            <input type="text" id="searchInput" placeholder="Buscar productos..." class="search-input">
+            <button id="searchBtn" class="search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+
+        <!-- Grupo de navegación y carrito a la derecha -->
+        <div class="header-group right-group flex items-center gap-4 md:order-none order-last w-full md:w-auto">
+            <nav class="header-nav hidden md:flex gap-4">
+                <a href="#products" class="nav-link">Productos</a>
+                <a href="#features" class="nav-link">Características</a>
+                <a href="#upcoming-sales" class="nav-link">Próximas Ventas</a>
+                <a href="#advantages" class="nav-link">Ventajas</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+                <a href="#contact" class="nav-link">Contacto</a>
+            </nav>
+            <button id="cartBtn" class="cart-icon-btn flex-shrink-0">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cartCount" class="cart-count hidden">0</span>
+            </button>
+        </div>
+
+        <!-- Mobile menu button (if needed, currently not fully functional) -->
+        <button class="md:hidden text-gray-800 text-2xl">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sección Hero con una imagen grande estática y contenido -->
+        <section class="relative w-full h-[500px] mb-24 rounded-3xl overflow-hidden shadow-xl flex items-center justify-center bg-gradient-to-br from-indigo-700 to-purple-900">
+            <!-- La imagen de fondo ahora es una URL limpia sin texto incrustado -->
+            <div class="absolute inset-0 opacity-60" style="background-image: url('https://placehold.co/1200x500/3b82f6/1a202c?text='); background-size: cover; background-position: center;"></div>
+            <div class="relative z-10 text-center text-white p-8 max-w-3xl">
+                <h1 class="font-poppins text-5xl font-extrabold mb-4 leading-tight text-shadow-lg">¡El Futuro es Ahora con ASG Empire!</h1>
+                <p class="text-xl mb-8 font-medium text-gray-200">Descubre la tecnología de vanguardia diseñada para transformar tu vida.</p>
+                <a href="#products" class="inline-flex items-center bg-indigo-500 text-white hover:bg-indigo-600 font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
+                    Explorar Productos
+                    <svg class="w-6 h-6 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </a>
+            </div>
+        </section>
+
+        <!-- Sección de Características -->
+        <section id="features" class="mb-24">
+            <h2 class="section-heading">¿Por Qué Elegir ASG Empire?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <div class="feature-card">
+                    <i class="fas fa-rocket feature-icon"></i>
+                    <h3 class="feature-title">Tecnología de Vanguardia</h3>
+                    <p class="feature-description">Siempre a la última, con productos que te ponen un paso adelante.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-check-circle feature-icon"></i>
+                    <h3 class="feature-title">Calidad Certificada</h3>
+                    <p class="feature-description">Cada producto pasa por rigurosos controles para asegurar tu satisfacción.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shipping-fast feature-icon"></i>
+                    <h3 class="feature-title">Envío Rápido y Seguro</h3>
+                    <p class="feature-description">Entregas eficientes y confiables directo a tu puerta, en todo el mundo.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-headset feature-icon"></i>
+                    <h3 class="feature-title">Soporte 24/7</h3>
+                    <p class="feature-description">Nuestro equipo siempre listo para ayudarte, en cualquier momento que lo necesites.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-star feature-icon"></i>
+                    <h3 class="feature-title">Experiencia de Usuario Premium</h3>
+                    <p class="feature-description">Diseño intuitivo y funcionalidad impecable para una interacción fluida.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <h3 class="feature-title">Seguridad Garantizada</h3>
+                    <p class="feature-description">Tus datos y transacciones protegidos con la más alta tecnología de encriptación.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Productos -->
+        <section id="products" class="mb-24">
+            <h2 class="section-heading">Nuestros Productos Más Destacados</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <!-- Tarjeta de Producto 1 -->
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/6366f1/ffffff" alt="Auriculares Gamer ASG" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod001"></i>
+                    </div>
+                    <h3 class="product-title">Auriculares Gamer Quantum</h3>
+                    <p class="product-price">S/. 199.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> (4.5/5)
+                    </div>
+                    <p class="product-review-snippet">"El sonido es brutal y la comodidad increíble. ¡Una compra obligada para gamers!"</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod001">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod001">Ver Detalles</button>
+                </div>
+
+                <!-- Tarjeta de Producto 2 -->
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/4f46e5/ffffff" alt="Smartwatch X1 ASG" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod002"></i>
+                    </div>
+                    <h3 class="product-title">Smartwatch Chronos X1</h3>
+                    <p class="product-price">S/. 249.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i> (4.0/5)
+                    </div>
+                    <p class="product-review-snippet">"Elegante, funcional y la batería dura días. ¡Perfecto para mi día a día!"</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod002">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod002">Ver Detalles</button>
+                </div>
+
+                <!-- Tarjeta de Producto 3 -->
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/3b82f6/ffffff" alt="Proyector Portátil ASG" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod003"></i>
+                    </div>
+                    <h3 class="product-title">Proyector Holográfico Aura</h3>
+                    <p class="product-price">S/. 399.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (5.0/5)
+                    </div>
+                    <p class="product-review-snippet">"Calidad de imagen asombrosa en cualquier pared. ¡Mi cine en casa portátil!"</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod003">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod003">Ver Detalles</button>
+                </div>
+
+                <!-- Tarjeta de Producto 4 -->
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/f6ad55/ffffff" alt="Teclado Mecánico ASG" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod004"></i>
+                    </div>
+                    <h3 class="product-title">Teclado Mecánico Cybernetic</h3>
+                    <p class="product-price">S/. 129.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> (4.5/5)
+                    </div>
+                    <p class="product-review-snippet">"Respuesta increíble y retroiluminación perfecta. ¡Ideal para trabajar y jugar!"</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod004">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod004">Ver Detalles</button>
+                </div>
+
+                <!-- Más Productos para demostrar escalabilidad -->
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/22d3ee/ffffff" alt="Cámara de Seguridad ASG" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod005"></i>
+                    </div>
+                    <h3 class="product-title">Cámara de Seguridad Guardian</h3>
+                    <p class="product-price">S/. 299.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (5.0/5)
+                    </div>
+                    <p class="product-review-snippet">"Imágenes nítidas y fácil instalación. ¡Mi casa está más segura que nunca!"</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod005">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod005">Ver Detalles</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/8b5cf6/ffffff" alt="Drone Plegable ASG" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod006"></i>
+                    </div>
+                    <h3 class="product-title">Drone Plegable Skyhawk</h3>
+                    <p class="product-price">S/. 549.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> (4.5/5)
+                    </div>
+                    <p class="product-review-snippet">"Compacto, fácil de volar y con una cámara impresionante. ¡Perfecto para aventuras!"</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod006">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod006">Ver Detalles</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/d946ef/ffffff" alt="Altavoz Inteligente ASG" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod007"></i>
+                    </div>
+                    <h3 class="product-title">Altavoz Inteligente EchoFlow</h3>
+                    <p class="product-price">S/. 149.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i> (3.5/5)
+                    </div>
+                    <p class="product-review-snippet">"Buen sonido y asistente de voz útil. La calidad de construcción es sólida."</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod007">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod007">Ver Detalles</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/f87171/ffffff" alt="Robot Aspirador ASG" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod008"></i>
+                    </div>
+                    <h3 class="product-title">Robot Aspirador CleanBot</h3>
+                    <p class="product-price">S/. 349.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (5.0/5)
+                    </div>
+                    <p class="product-review-snippet">"¡Cambió mi vida! Limpia perfectamente y es súper silencioso. Lo amo."</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod008">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod008">Ver Detalles</button>
+                </div>
+
+                <!-- Nuevos Productos Adicionales -->
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/60a5fa/ffffff" alt="Estación de Carga Inalámbrica" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod009"></i>
+                    </div>
+                    <h3 class="product-title">Estación de Carga Neo</h3>
+                    <p class="product-price">S/. 89.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> (4.5/5)
+                    </div>
+                    <p class="product-review-snippet">"Carga todos mis dispositivos a la vez. ¡Súper práctico y elegante!"</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod009">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod009">Ver Detalles</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/c026d3/ffffff" alt="Gafas de Realidad Virtual" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod010"></i>
+                    </div>
+                    <h3 class="product-title">Gafas VR Immersion Pro</h3>
+                    <p class="product-price">S/. 799.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (5.0/5)
+                    </div>
+                    <p class="product-review-snippet">"La inmersión es total, los juegos se sienten reales. ¡Una pasada!"</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod010">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod010">Ver Detalles</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/fbbf24/ffffff" alt="Purificador de Aire Inteligente" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod011"></i>
+                    </div>
+                    <h3 class="product-title">Purificador de Aire AuraClean</h3>
+                    <p class="product-price">S/. 219.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> (4.5/5)
+                    </div>
+                    <p class="product-review-snippet">"El aire en casa se siente mucho más fresco. ¡Impresionante!"</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod011">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod011">Ver Detalles</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="https://placehold.co/400x300/10b981/ffffff" alt="Sistema de Seguridad Inteligente" class="product-image">
+                        <i class="far fa-heart wishlist-icon" data-product-id="prod012"></i>
+                    </div>
+                    <h3 class="product-title">Sistema de Seguridad Sentinel</h3>
+                    <p class="product-price">S/. 699.99</p>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (5.0/5)
+                    </div>
+                    <p class="product-review-snippet">"Fácil de instalar y me da total tranquilidad. ¡Excelente inversión!"</p>
+                    <button class="add-to-cart-btn mt-4" data-product-id="prod012">Añadir al Carrito</button>
+                    <button class="view-details-btn mt-2" data-product-id="prod012">Ver Detalles</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Próximas Ventas a Agregar (Carrusel) -->
+        <section id="upcoming-sales" class="mb-24">
+            <h2 class="section-heading">Próximas Ventas a Agregar</h2>
+            <div class="upcoming-sales-carousel">
+                <div class="upcoming-sale-slide active" style="background-image: url('https://placehold.co/1200x400/1e3a8a/e0e7ff?text=Nuevo+Smartwatch');">
+                    <div class="upcoming-sale-content">
+                        <h3 class="upcoming-sale-title">Smartwatch Aura X2</h3>
+                        <p class="upcoming-sale-description">La próxima generación de wearables con IA integrada. ¡Mantente conectado y saludable!</p>
+                        <a href="#" class="upcoming-sale-cta">Notificarme</a>
+                    </div>
+                </div>
+                <div class="upcoming-sale-slide" style="background-image: url('https://placehold.co/1200x400/4c0519/fecaca?text=Drone+Profesional');">
+                    <div class="upcoming-sale-content">
+                        <h3 class="upcoming-sale-title">Drone Profesional Phantom 7</h3>
+                        <p class="upcoming-sale-description">Captura el mundo desde nuevas alturas con nuestra cámara 8K y estabilidad de vuelo.</p>
+                        <a href="#" class="upcoming-sale-cta">Notificarme</a>
+                    </div>
+                </div>
+                <div class="upcoming-sale-slide" style="background-image: url('https://placehold.co/1200x400/064e3b/d1fae5?text=Consola+Retro');">
+                    <div class="upcoming-sale-content">
+                        <h3 class="upcoming-sale-title">Consola Retro Genesis Max</h3>
+                        <p class="upcoming-sale-description">Revive la nostalgia con más de 1000 juegos clásicos en 4K. ¡Diversión garantizada!</p>
+                        <a href="#" class="upcoming-sale-cta">Notificarme</a>
+                    </div>
+                </div>
+                <!-- Nuevas diapositivas de Próximas Ventas -->
+                <div class="upcoming-sale-slide" style="background-image: url('https://placehold.co/1200x400/312e81/c7d2fe?text=Auriculares+Inalambricos');">
+                    <div class="upcoming-sale-content">
+                        <h3 class="upcoming-sale-title">Auriculares Inalámbricos Sonido 3D</h3>
+                        <p class="upcoming-sale-description">Sumérgete en una experiencia de audio sin igual con cancelación de ruido activa.</p>
+                        <a href="#" class="upcoming-sale-cta">Notificarme</a>
+                    </div>
+                </div>
+                <div class="upcoming-sale-slide" style="background-image: url('https://placehold.co/1200x400/be123c/fee2e2?text=Robot+Limpieza');">
+                    <div class="upcoming-sale-content">
+                        <h3 class="upcoming-sale-title">Robot de Limpieza Inteligente</h3>
+                        <p class="upcoming-sale-description">Tu hogar siempre impecable con este asistente de limpieza totalmente autónomo.</p>
+                        <a href="#" class="upcoming-sale-cta">Notificarme</a>
+                    </div>
+                </div>
+                <div class="upcoming-sale-slide" style="background-image: url('https://placehold.co/1200x400/047857/d1fae5?text=Mini+Proyector+4K');">
+                    <div class="upcoming-sale-content">
+                        <h3 class="upcoming-sale-title">Mini Proyector Portátil 4K</h3>
+                        <p class="upcoming-sale-description">Lleva el cine a cualquier parte con una calidad de imagen asombrosa en un tamaño compacto.</p>
+                        <a href="#" class="upcoming-sale-cta">Notificarme</a>
+                    </div>
+                </div>
+
+                <button class="carousel-nav-btn left" id="upcomingSalesPrev"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-nav-btn right" id="upcomingSalesNext"><i class="fas fa-chevron-right"></i></button>
+                <div class="carousel-dots" id="upcomingSalesDots"></div>
+            </div>
+        </section>
+
+        <!-- Nueva Sección: Ventajas Exclusivas ASG Empire -->
+        <section id="advantages" class="advantages-section">
+            <h2 class="section-heading">Ventajas Exclusivas ASG Empire</h2>
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3 class="advantage-title">Innovación Constante</h3>
+                    <p class="advantage-description">Siempre a la vanguardia con los últimos avances tecnológicos para ti.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="advantage-title">Soporte Dedicado 24/7</h3>
+                    <p class="advantage-description">Nuestro equipo experto está siempre listo para asistirte, día y noche.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="advantage-title">Seguridad Inquebrantable</h3>
+                    <p class="advantage-description">Tus datos y transacciones protegidos con la más alta tecnología de cifrado.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h3 class="advantage-title">Entrega Ultra Rápida</h3>
+                    <p class="advantage-description">Recibe tus productos en tiempo récord, directamente en tu puerta.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Preguntas Frecuentes (FAQ) -->
+        <section id="faq" class="mb-24">
+            <h2 class="section-heading">Preguntas Frecuentes</h2>
+            <div class="max-w-3xl mx-auto">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        ¿Cuál es el tiempo de envío estimado?
+                        <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        El tiempo de entrega estimado es de 7 a 18 días hábiles, dependiendo de tu ubicación. Hacemos todo lo posible para que tu pedido llegue lo antes posible.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        ¿Ofrecen garantía de satisfacción?
+                        <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Sí, ofrecemos una garantía de satisfacción de 30 días. Si no estás completamente contento con tu compra, contáctanos para procesar una devolución o cambio.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        ¿Cómo puedo rastrear mi pedido?
+                        <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Una vez que tu pedido sea enviado, recibirás un correo electrónico con un número de seguimiento. Podrás usarlo en nuestra sección de rastreo de pedidos.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        ¿Es seguro comprar en esta página?
+                        <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Absolutamente. Utilizamos encriptación SSL y pasarelas de pago seguras para proteger tu información personal y financiera. Tu seguridad es nuestra prioridad.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Pie de Página -->
+    <footer id="contact">
+        <div class="container mx-auto py-12 px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
+                <!-- Columna 1: Logo y Sobre Nosotros -->
+                <div>
+                    <div class="logo text-3xl mb-4">ASG Empire</div>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        En ASG Empire, nos dedicamos a traer la innovación del futuro a tu presente.
+                        Explora nuestra selección de productos de vanguardia diseñados para mejorar tu vida.
+                    </p>
+                </div>
+
+                <!-- Columna 2: Enlaces de Navegación -->
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">Explorar</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#products" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200">Productos</a></li>
+                        <li><a href="#features" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200">Características</a></li>
+                        <li><a href="#upcoming-sales" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200">Próximas Ventas</a></li>
+                        <li><a href="#advantages" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200">Ventajas</a></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 3: Soporte y Ayuda -->
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">Soporte</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#faq" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200">Preguntas Frecuentes</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200">Centro de Ayuda</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200">Devoluciones y Envíos</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200">Garantía</a></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 4: Contacto y Boletín -->
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">Mantente Conectado</h4>
+                    <p class="text-gray-400 text-sm mb-4">
+                        Recibe las últimas noticias y ofertas exclusivas directamente en tu bandeja de entrada.
+                    </p>
+                    <form class="flex flex-col sm:flex-row gap-2 mb-6">
+                        <input type="email" placeholder="Tu correo electrónico" class="flex-grow p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-indigo-500">
+                        <button type="submit" class="btn btn-primary px-4 py-3 text-sm">Suscribirme</button>
+                    </form>
+                    <div class="social-icons flex gap-4 justify-start">
+                        <a href="#" aria-label="Facebook" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200 text-2xl"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200 text-2xl"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200 text-2xl"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="YouTube" class="text-gray-400 hover:text-indigo-400 transition-colors duration-200 text-2xl"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                <p class="text-gray-400 text-sm">&copy; 2025 ASG Empire. Todos los derechos reservados. Diseñado para dominar por Gemini.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón Volver Arriba -->
+    <button id="backToTopBtn">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Modal de Confirmación de Artículo Añadido -->
+    <div id="itemAddedModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="closeItemAddedModalBtn">&times;</button>
+            <h3>¡Producto Añadido al Carrito!</h3>
+            <p id="itemAddedMessage">"Producto" ha sido añadido a tu carrito.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" id="viewCartFromAddedModal">Ver Carrito</button>
+                <button class="btn btn-secondary" id="continueShoppingBtn">Seguir Comprando</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal del Carrito -->
+    <div id="cartModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="closeCartModalBtn">&times;</button>
+            <h3>Tu Carrito de Compras ASG</h3>
+            <div id="cartItemsContainer" class="mb-4">
+                <!-- Los elementos del carrito se cargarán aquí -->
+                <p id="emptyCartMessage" class="empty-cart-message">Tu carrito está vacío. ¡Explora nuestros productos!</p>
+            </div>
+            <div id="cartTotalContainer" class="cart-total hidden">
+                Total: S/. <span id="cartTotalPrice">0.00</span>
+            </div>
+            <div class="modal-buttons">
+                <button id="checkoutBtn" class="btn btn-primary hidden">Proceder al Pago</button>
+                <button type="button" class="btn btn-secondary" id="clearCartBtn">Vaciar Carrito</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Compra -->
+    <div id="purchaseConfirmModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="closePurchaseConfirmModalBtn">&times;</button>
+            <h3>Confirmar Tu Pedido</h3>
+            <form id="purchaseConfirmForm">
+                <div class="modal-form-group">
+                    <label for="confirmName">Nombre Completo:</label>
+                    <input type="text" id="confirmName" placeholder="Tu Nombre" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="confirmEmail">Correo Electrónico:</label>
+                    <input type="email" id="confirmEmail" placeholder="tu@ejemplo.com" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="confirmPhone">Teléfono (Opcional):</label>
+                    <input type="tel" id="confirmPhone" placeholder="+51 987 654 321">
+                </div>
+                <div class="modal-form-group">
+                    <label for="confirmAddress">Dirección de Envío Completa:</label>
+                    <textarea id="confirmAddress" rows="4" placeholder="Calle, número, departamento, ciudad, código postal" required></textarea>
+                </div>
+                <div class="modal-form-group">
+                    <label>Productos en Carrito:</label>
+                    <ul id="confirmCartSummary" class="text-sm text-gray-700 bg-gray-100 p-3 rounded-md max-h-40 overflow-y-auto">
+                        <!-- El resumen del carrito se inyectará aquí -->
+                    </ul>
+                </div>
+                <div class="cart-total text-right mt-4">
+                    Total a Pagar: S/. <span id="confirmTotalPrice">0.00</span>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Finalizar Compra</button>
+                    <button type="button" class="btn btn-secondary" id="cancelPurchaseConfirmModalBtn">Volver al Carrito</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Lista de Deseos -->
+    <div id="wishlistModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="closeWishlistModalBtn">&times;</button>
+            <h3>Tu Lista de Deseos ASG</h3>
+            <div id="wishlistItemsContainer" class="mb-4">
+                <!-- Los elementos de la lista de deseos se cargarán aquí -->
+                <p id="emptyWishlistMessage" class="empty-cart-message">Tu lista de deseos está vacía. ¡Añade tus favoritos!</p>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" id="clearWishlistBtn">Vaciar Lista</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal de Detalles del Producto -->
+    <div id="productDetailModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="closeProductDetailModalBtn">&times;</button>
+            <div class="product-detail-grid"> <!-- Nuevo contenedor de cuadrícula para dos columnas -->
+                <div class="product-detail-left-column">
+                    <!-- Carrusel de Imágenes del Producto -->
+                    <div class="product-image-carousel" id="productImageCarousel">
+                        <div class="carousel-slides-container">
+                            <!-- Las diapositivas de la imagen se cargarán aquí -->
+                        </div>
+                        <button class="carousel-nav-btn left" id="productImagePrev"><i class="fas fa-chevron-left"></i></button>
+                        <button class="carousel-nav-btn right" id="productImageNext"><i class="fas fa-chevron-right"></i></button>
+                        <div class="carousel-dots" id="productImageDots"></div>
+                    </div>
+                </div>
+                <div class="product-detail-right-column">
+                    <h3 id="productDetailTitle" class="product-detail-title"></h3>
+                    <p id="productDetailPrice" class="product-detail-price"></p>
+                    <div id="productDetailRating" class="product-rating"></div>
+
+                    <p id="productDetailDescription" class="product-detail-description"></p>
+
+                    <!-- Quantity Selector -->
+                    <div class="quantity-selector-group">
+                        <label for="productQuantity" class="text-sm font-semibold text-gray-300 mb-2 block">Cantidad:</label>
+                        <div class="flex items-center gap-2">
+                            <button id="decreaseQuantityBtn" class="btn-icon text-lg"><i class="fas fa-minus-circle"></i></button>
+                            <input type="number" id="productQuantity" value="1" min="1" class="w-16 text-center bg-gray-700 border border-gray-600 rounded-md py-2 text-white">
+                            <button id="increaseQuantityBtn" class="btn-icon text-lg"><i class="fas fa-plus-circle"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons flex-col mt-4">
+                        <button id="addToCartFromDetailBtn" class="btn btn-primary w-full mb-2">Añadir al Carrito</button>
+                        <button id="buyNowBtn" class="btn btn-secondary w-full">Comprar Ahora</button>
+                    </div>
+
+                    <div class="product-detail-specs mt-6 pt-4 border-t border-gray-700">
+                        <h4 class="text-lg font-bold text-white mb-2">Especificaciones Técnicas:</h4>
+                        <ul id="productDetailSpecsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <!-- Las especificaciones se cargarán aquí -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reviews-section mt-6"> <!-- Esta sección estará debajo de las dos columnas -->
+                <h4>Reseñas de Clientes</h4>
+                <div id="reviewsList" class="reviews-list">
+                    <!-- Las reseñas se cargarán aquí -->
+                    <p id="noReviewsMessage" class="empty-cart-message">Sé el primero en dejar una reseña.</p>
+                </div>
+
+                <form id="addReviewForm" class="add-review-form">
+                    <h5 class="text-lg font-bold text-white mb-3">Deja Tu Reseña:</h5>
+                    <div class="modal-form-group">
+                        <label for="reviewerName">Tu Nombre:</label>
+                        <input type="text" id="reviewerName" placeholder="Ej. Juan Pérez" required>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="reviewRating">Tu Calificación:</label>
+                        <select id="reviewRating" required class="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600">
+                            <option value="">Selecciona una calificación</option>
+                            <option value="5">★★★★★ Excelente</option>
+                            <option value="4">★★★★☆ Muy Bueno</option>
+                            <option value="3">★★★☆☆ Bueno</option>
+                            <option value="2">★★☆☆☆ Regular</option>
+                            <option value="1">★☆☆☆☆ Malo</option>
+                        </select>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="reviewComment">Tu Comentario:</label>
+                        <textarea id="reviewComment" rows="4" placeholder="Comparte tu experiencia con el producto..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar Reseña</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Desplazamiento suave para enlaces internos
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        window.onload = async () => { // Made onload async to await Firebase auth
+            // Declaración de variables de elementos del DOM
+            const itemAddedModal = document.getElementById('itemAddedModal');
+            const closeItemAddedModalBtn = document.getElementById('closeItemAddedModalBtn');
+            const itemAddedMessage = document.getElementById('itemAddedMessage');
+            const viewCartFromAddedModal = document.getElementById('viewCartFromAddedModal');
+            const continueShoppingBtn = document.getElementById('continueShoppingBtn');
+
+            const cartBtn = document.getElementById('cartBtn');
+            const cartModal = document.getElementById('cartModal');
+            const closeCartModalBtn = document.getElementById('closeCartModalBtn');
+            const cartItemsContainer = document.getElementById('cartItemsContainer');
+            const emptyCartMessage = document.getElementById('emptyCartMessage');
+            const cartTotalContainer = document.getElementById('cartTotalContainer');
+            const cartTotalPriceElem = document.getElementById('cartTotalPrice');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const clearCartBtn = document.getElementById('clearCartBtn');
+            const cartCountElem = document.getElementById('cartCount');
+
+            const purchaseConfirmModal = document.getElementById('purchaseConfirmModal');
+            const closePurchaseConfirmModalBtn = document.getElementById('closePurchaseConfirmModalBtn');
+            const cancelPurchaseConfirmModalBtn = document.getElementById('cancelPurchaseConfirmModalBtn');
+            const purchaseConfirmForm = document.getElementById('purchaseConfirmForm');
+            const confirmCartSummary = document.getElementById('confirmCartSummary');
+            const confirmTotalPriceElem = document.getElementById('confirmTotalPrice');
+
+            const wishlistModal = document.getElementById('wishlistModal');
+            const closeWishlistModalBtn = document.getElementById('closeWishlistModalBtn');
+            const wishlistItemsContainer = document.getElementById('wishlistItemsContainer');
+            const emptyWishlistMessage = document.getElementById('emptyWishlistMessage');
+            const clearWishlistBtn = document.getElementById('clearWishlistBtn');
+            const wishlistIcons = document.querySelectorAll('.wishlist-icon');
+
+            const productDetailModal = document.getElementById('productDetailModal');
+            const closeProductDetailModalBtn = document.getElementById('closeProductDetailModalBtn');
+            // const productDetailImage = document.getElementById('productDetailImage'); // Replaced by carousel
+            const productDetailTitle = document.getElementById('productDetailTitle');
+            const productDetailPrice = document.getElementById('productDetailPrice');
+            const productDetailRating = document.getElementById('productDetailRating');
+            const productDetailDescription = document.getElementById('productDetailDescription');
+            const productDetailSpecsList = document.getElementById('productDetailSpecsList');
+            const addToCartFromDetailBtn = document.getElementById('addToCartFromDetailBtn');
+            const buyNowBtn = document.getElementById('buyNowBtn');
+            const reviewsList = document.getElementById('reviewsList');
+            const noReviewsMessage = document.getElementById('noReviewsMessage');
+            const addReviewForm = document.getElementById('addReviewForm');
+            const reviewerNameInput = document.getElementById('reviewerName');
+            const reviewRatingInput = document.getElementById('reviewRating');
+            const reviewCommentInput = document.getElementById('reviewComment');
+            const productQuantityInput = document.getElementById('productQuantity'); // Nuevo
+            const decreaseQuantityBtn = document.getElementById('decreaseQuantityBtn'); // Nuevo
+            const increaseQuantityBtn = document.getElementById('increaseQuantityBtn'); // Nuevo
+
+            const backToTopBtn = document.getElementById('backToTopBtn');
+
+            // Header elements for new functionality
+            const headerLogo = document.getElementById('headerLogo'); // New: Logo element
+            const searchInput = document.getElementById('searchInput'); // New: Search input
+            const searchBtn = document.getElementById('searchBtn'); // New: Search button
+
+            // Firebase Initialization
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                apiKey: "YOUR_API_KEY", // Replace with your Firebase project's API key
+                authDomain: "YOUR_AUTH_DOMAIN",
+                projectId: "YOUR_PROJECT_ID",
+                storageBucket: "YOUR_STORAGE_BUCKET",
+                messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+                appId: "YOUR_APP_ID"
+            };
+
+            const app = firebase.initializeApp(firebaseConfig);
+            const db = firebase.getFirestore(app);
+            const auth = firebase.getAuth(app);
+
+            let userId = null;
+            let isAuthReady = false;
+            let currentReviewsUnsubscribe = null; // To store the unsubscribe function for Firestore listener
+
+            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+            firebase.onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    console.log("Authenticated with UID:", userId);
+                } else {
+                    if (initialAuthToken) {
+                        try {
+                            await firebase.signInWithCustomToken(auth, initialAuthToken);
+                            userId = auth.currentUser.uid;
+                            console.log("Signed in with custom token, UID:", userId);
+                        } catch (error) {
+                            console.error("Error signing in with custom token:", error);
+                            // Fallback to anonymous if custom token fails
+                            try {
+                                const anonymousUser = await firebase.signInAnonymously(auth);
+                                userId = anonymousUser.user.uid;
+                                console.log("Signed in anonymously after custom token failure, UID:", userId);
+                            } catch (anonError) {
+                                console.error("Error signing in anonymously:", anonError);
+                            }
+                        }
+                    } else {
+                        try {
+                            const anonymousUser = await firebase.signInAnonymously(auth);
+                            userId = anonymousUser.user.uid;
+                            console.log("Signed in anonymously, UID:", userId);
+                        } catch (error) {
+                            console.error("Error signing in anonymously:", error);
+                        }
+                    }
+                }
+                isAuthReady = true;
+                // If a product detail modal was waiting for auth, re-trigger its review load
+                if (productDetailModal.classList.contains('show') && currentProduct) {
+                    fetchAndDisplayReviews(currentProduct.id);
+                }
+            });
+
+
+            // Array de productos con detalles completos (reseñas se cargarán de Firestore)
+            const products = [
+                {
+                    id: 'prod001',
+                    name: 'Auriculares Gamer Quantum',
+                    price: 199.99,
+                    image: 'https://placehold.co/400x300/6366f1/ffffff?text=Auriculares+Gamer',
+                    description: 'Experimenta la inmersión total con los Auriculares Gamer Quantum. Sonido envolvente 7.1, micrófono con cancelación de ruido y almohadillas de memoria para horas de comodidad. Compatibles con PC, PlayStation y Xbox.',
+                    specs: [
+                        'Sonido envolvente 7.1',
+                        'Micrófono retráctil con cancelación de ruido',
+                        'Almohadillas de espuma con memoria',
+                        'Conexión USB y 3.5mm',
+                        'Iluminación RGB personalizable'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/6366f1/ffffff?text=Auriculares+Vista+1',
+                        'https://placehold.co/400x300/6366f1/ffffff?text=Auriculares+Vista+2',
+                        'https://placehold.co/400x300/6366f1/ffffff?text=Auriculares+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod002',
+                    name: 'Smartwatch Chronos X1',
+                    price: 249.99,
+                    image: 'https://placehold.co/400x300/4f46e5/ffffff?text=Smartwatch+X1',
+                    description: 'Mantente conectado y monitorea tu salud con el Smartwatch Chronos X1. Pantalla AMOLED, monitoreo de frecuencia cardíaca, oxígeno en sangre y GPS integrado. Batería de larga duración.',
+                    specs: [
+                        'Pantalla AMOLED de 1.4 pulgadas',
+                        'Monitoreo de frecuencia cardíaca 24/7',
+                        'GPS integrado',
+                        'Resistencia al agua 5ATM',
+                        'Batería de hasta 7 días'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/4f46e5/ffffff?text=Smartwatch+Vista+1',
+                        'https://placehold.co/400x300/4f46e5/ffffff?text=Smartwatch+Vista+2',
+                        'https://placehold.co/400x300/4f46e5/ffffff?text=Smartwatch+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod003',
+                    name: 'Proyector Holográfico Aura',
+                    price: 399.99,
+                    image: 'https://placehold.co/400x300/3b82f6/ffffff?text=Proyector+Aura',
+                    description: 'Transforma cualquier espacio en un cine con el Proyector Holográfico Aura. Proyección Full HD con tecnología láser y altavoces estéreo integrados. Diseño compacto y portátil.',
+                    specs: [
+                        'Resolución Full HD (1920x1080p)',
+                        'Tecnología de proyección láser',
+                        'Brillo de 2000 lúmenes',
+                        'Altavoces estéreo integrados',
+                        'Conectividad HDMI, USB, Wi-Fi'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/3b82f6/ffffff?text=Proyector+Vista+1',
+                        'https://placehold.co/400x300/3b82f6/ffffff?text=Proyector+Vista+2',
+                        'https://placehold.co/400x300/3b82f6/ffffff?text=Proyector+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod004',
+                    name: 'Teclado Mecánico Cybernetic',
+                    price: 129.99,
+                    image: 'https://placehold.co/400x300/f6ad55/ffffff?text=Teclado+Cybernetic',
+                    description: 'El Teclado Mecánico Cybernetic ofrece una respuesta ultrarrápida y una experiencia de escritura superior. Switches mecánicos duraderos, retroiluminación RGB personalizable y diseño ergonómico.',
+                    specs: [
+                        'Switches mecánicos (Red/Blue/Brown)',
+                        'Retroiluminación RGB por tecla',
+                        'Anti-ghosting completo',
+                        'Reposamuñecas magnético',
+                        'Construcción de aluminio'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/f6ad55/ffffff?text=Teclado+Vista+1',
+                        'https://placehold.co/400x300/f6ad55/ffffff?text=Teclado+Vista+2',
+                        'https://placehold.co/400x300/f6ad55/ffffff?text=Teclado+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod005',
+                    name: 'Cámara de Seguridad Guardian',
+                    price: 299.99,
+                    image: 'https://placehold.co/400x300/22d3ee/ffffff?text=Camara+Guardian',
+                    description: 'Protege tu hogar con la Cámara de Seguridad Guardian. Resolución 4K, visión nocturna avanzada, detección de movimiento con IA y audio bidireccional. Acceso remoto desde tu smartphone.',
+                    specs: [
+                        'Resolución 4K Ultra HD',
+                        'Visión nocturna a color',
+                        'Detección de movimiento con IA',
+                        'Audio bidireccional',
+                        'Almacenamiento en la nube y microSD'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/22d3ee/ffffff?text=Camara+Vista+1',
+                        'https://placehold.co/400x300/22d3ee/ffffff?text=Camara+Vista+2',
+                        'https://placehold.co/400x300/22d3ee/ffffff?text=Camara+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod006',
+                    name: 'Drone Plegable Skyhawk',
+                    price: 549.99,
+                    image: 'https://placehold.co/400x300/8b5cf6/ffffff?text=Drone+Skyhawk',
+                    description: 'El Drone Plegable Skyhawk es perfecto para aventuras y capturas aéreas impresionantes. Cámara 4K con estabilización de 3 ejes, autonomía de vuelo extendida y modos de vuelo inteligentes.',
+                    specs: [
+                        'Cámara 4K con gimbal de 3 ejes',
+                        'Diseño plegable y compacto',
+                        'Autonomía de vuelo de 30 minutos',
+                        'Modos de vuelo inteligentes (sígueme, órbita)',
+                        'Alcance de 5 km'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/8b5cf6/ffffff?text=Drone+Vista+1',
+                        'https://placehold.co/400x300/8b5cf6/ffffff?text=Drone+Vista+2',
+                        'https://placehold.co/400x300/8b5cf6/ffffff?text=Drone+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod007',
+                    name: 'Altavoz Inteligente EchoFlow',
+                    price: 149.99,
+                    image: 'https://placehold.co/400x300/d946ef/ffffff?text=Altavoz+EchoFlow',
+                    description: 'El Altavoz Inteligente EchoFlow te ofrece un sonido potente y un asistente de voz integrado. Controla tu música, dispositivos inteligentes y obtén información con solo tu voz.',
+                    specs: [
+                        'Sonido de 360 grados',
+                        'Asistente de voz integrado (compatible con Alexa/Google Assistant)',
+                        'Conectividad Wi-Fi y Bluetooth',
+                        'Diseño elegante y compacto',
+                        'Controles táctiles intuitivos'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/d946ef/ffffff?text=Altavoz+Vista+1',
+                        'https://placehold.co/400x300/d946ef/ffffff?text=Altavoz+Vista+2',
+                        'https://placehold.co/400x300/d946ef/ffffff?text=Altavoz+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod008',
+                    name: 'Robot Aspirador CleanBot',
+                    price: 349.99,
+                    image: 'https://placehold.co/400x300/f87171/ffffff?text=Robot+CleanBot',
+                    description: 'Deja que el Robot Aspirador CleanBot se encargue de la limpieza. Navegación inteligente, mapeo de habitaciones, alta potencia de succión y control por app. Compatible con mascotas.',
+                    specs: [
+                        'Navegación inteligente con mapeo láser',
+                        'Alta potencia de succión (2500Pa)',
+                        'Batería de 180 minutos',
+                        'Control por aplicación móvil',
+                        'Compatible con alfombras y suelos duros'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/f87171/ffffff?text=Robot+Vista+1',
+                        'https://placehold.co/400x300/f87171/ffffff?text=Robot+Vista+2',
+                        'https://placehold.co/400x300/f87171/ffffff?text=Robot+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod009',
+                    name: 'Estación de Carga Neo',
+                    price: 89.99,
+                    image: 'https://placehold.co/400x300/60a5fa/ffffff?text=Carga+Neo',
+                    description: 'Simplifica tu espacio con la Estación de Carga Neo. Carga inalámbrica rápida para múltiples dispositivos (teléfono, reloj, auriculares) simultáneamente. Diseño minimalista y elegante.',
+                    specs: [
+                        'Carga inalámbrica rápida (hasta 15W)',
+                        'Carga simultánea de 3 dispositivos',
+                        'Compatibilidad universal Qi',
+                        'Indicadores LED de carga',
+                        'Protección contra sobrecarga'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/60a5fa/ffffff?text=Carga+Vista+1',
+                        'https://placehold.co/400x300/60a5fa/ffffff?text=Carga+Vista+2',
+                        'https://placehold.co/400x300/60a5fa/ffffff?text=Carga+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod010',
+                    name: 'Gafas VR Immersion Pro',
+                    price: 799.99,
+                    image: 'https://placehold.co/400x300/c026d3/ffffff?text=Gafas+VR',
+                    description: 'Sumérgete en mundos virtuales con las Gafas VR Immersion Pro. Pantalla de alta resolución, seguimiento de movimiento preciso y controladores ergonómicos para una experiencia VR inigualable.',
+                    specs: [
+                        'Resolución 4K por ojo',
+                        'Campo de visión de 110 grados',
+                        'Frecuencia de actualización de 90Hz',
+                        'Controladores hápticos',
+                        'Audio espacial integrado'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/c026d3/ffffff?text=Gafas+VR+Vista+1',
+                        'https://placehold.co/400x300/c026d3/ffffff?text=Gafas+VR+Vista+2',
+                        'https://placehold.co/400x300/c026d3/ffffff?text=Gafas+VR+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod011',
+                    name: 'Purificador de Aire AuraClean',
+                    price: 219.99,
+                    image: 'https://placehold.co/400x300/fbbf24/ffffff?text=Purificador+AuraClean',
+                    description: 'Respira aire puro con el Purificador de Aire AuraClean. Filtro HEPA de 3 etapas, sensor de calidad del aire y modo automático. Ideal para alérgicos y hogares con mascotas.',
+                    specs: [
+                        'Filtro HEPA de 3 etapas (pre-filtro, HEPA, carbón activado)',
+                        'Sensor de calidad del aire PM2.5',
+                        'Cobertura de hasta 50m²',
+                        'Modo silencioso nocturno',
+                        'Control por aplicación y voz'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/fbbf24/ffffff?text=Purificador+Vista+1',
+                        'https://placehold.co/400x300/fbbf24/ffffff?text=Purificador+Vista+2',
+                        'https://placehold.co/400x300/fbbf24/ffffff?text=Purificador+Detalle'
+                    ]
+                },
+                {
+                    id: 'prod012',
+                    name: 'Sistema de Seguridad Sentinel',
+                    price: 699.99,
+                    image: 'https://placehold.co/400x300/10b981/ffffff?text=Seguridad+Sentinel',
+                    description: 'El Sistema de Seguridad Sentinel te ofrece protección completa para tu hogar. Incluye cámara, sensores de puertas/ventanas, alarma y monitoreo 24/7. Fácil instalación DIY.',
+                    specs: [
+                        'Cámara Full HD con visión nocturna',
+                        'Sensores de puertas y ventanas',
+                        'Alarma de 100dB',
+                        'Monitoreo profesional opcional',
+                        'Instalación inalámbrica'
+                    ],
+                    galleryImages: [
+                        'https://placehold.co/400x300/10b981/ffffff?text=Seguridad+Vista+1',
+                        'https://placehold.co/400x300/10b981/ffffff?text=Seguridad+Vista+2',
+                        'https://placehold.co/400x300/10b981/ffffff?text=Seguridad+Detalle'
+                    ]
+                }
+            ];
+
+
+            /**
+             * Abre un modal dado.
+             * @param {HTMLElement} modalElement
+             */
+            function openModal(modalElement) {
+                modalElement.classList.remove('hidden');
+                setTimeout(() => modalElement.classList.add('show'), 10);
+            }
+
+            /**
+             * Cierra un modal dado.
+             * @param {HTMLElement} modalElement
+             */
+            function closeModal(modalElement) {
+                modalElement.classList.remove('show');
+                setTimeout(() => modalElement.classList.add('hidden'), 400);
+            }
+
+            // Oyentes de Eventos para el Modal de Artículo Añadido
+            closeItemAddedModalBtn.addEventListener('click', () => closeModal(itemAddedModal));
+            continueShoppingBtn.addEventListener('click', () => closeModal(itemAddedModal));
+            viewCartFromAddedModal.addEventListener('click', () => {
+                closeModal(itemAddedModal);
+                openModal(cartModal);
+            });
+
+
+            // ====================================================================================
+            // === LÓGICA DEL CARRUSEL GENERAL ============================================================
+            // ====================================================================================
+
+            /**
+             * Inicializa un carrusel.
+             * @param {string} carouselId - ID del contenedor del carrusel.
+             * @param {string} prevBtnId - ID del botón anterior.
+             * @param {string} nextBtnId - ID del botón siguiente.
+             * @param {string} dotsId - ID del contenedor de los puntos.
+             * @param {number} intervalTime - Tiempo en ms para el deslizamiento automático.
+             * @param {string} slideClass - Clase CSS para las diapositivas del carrusel (ej. 'testimonial-slide', 'upcoming-sale-slide').
+             * @param {string} slidesContainerClass - Clase CSS para el contenedor de las diapositivas dentro del carrusel.
+             */
+            function initCarousel(carouselId, prevBtnId, nextBtnId, dotsId, intervalTime = 5000, slideClass, slidesContainerClass) {
+                const carousel = document.querySelector(`#${carouselId}`);
+                if (!carousel) return;
+
+                const slidesContainer = carousel.querySelector(`.${slidesContainerClass}`);
+                const slides = slidesContainer ? slidesContainer.querySelectorAll(`.${slideClass}`) : [];
+
+                // If there are no slides, or only one, no need for carousel functionality
+                if (slides.length <= 1) {
+                    if (slides.length === 1) {
+                        slides[0].classList.add('active'); // Ensure single slide is visible
+                    }
+                    // Hide navigation and dots if only one or no slides
+                    const prevBtn = document.getElementById(prevBtnId);
+                    const nextBtn = document.getElementById(nextBtnId);
+                    const dotsContainer = document.getElementById(dotsId);
+                    if (prevBtn) prevBtn.style.display = 'none';
+                    if (nextBtn) nextBtn.style.display = 'none';
+                    if (dotsContainer) dotsContainer.style.display = 'none';
+                    return;
+                }
+
+                const prevBtn = document.getElementById(prevBtnId);
+                const nextBtn = document.getElementById(nextBtnId);
+                const dotsContainer = document.getElementById(dotsId);
+
+                let currentSlide = 0;
+                let slideInterval;
+
+                // Create dots
+                dotsContainer.innerHTML = '';
+                slides.forEach((_, index) => {
+                    const dot = document.createElement('span');
+                    dot.classList.add('carousel-dot');
+                    if (index === 0) dot.classList.add('active');
+                    dot.addEventListener('click', () => goToSlide(index));
+                    dotsContainer.appendChild(dot);
+                });
+                const dots = dotsContainer.querySelectorAll('.carousel-dot');
+
+                /**
+                 * Shows a specific slide (for a fade carousel).
+                 * @param {number} index - Index of the slide to show.
+                 */
+                function showSlide(index) {
+                    slides.forEach((slide, i) => {
+                        slide.classList.remove('active');
+                        if (dots[i]) dots[i].classList.remove('active');
+                    });
+                    slides[index].classList.add('active');
+                    if (dots[index]) dots[index].classList.add('active');
+                    currentSlide = index;
+                }
+
+                /**
+                 * Starts the automatic slideshow.
+                 */
+                function startSlideShow() {
+                    clearInterval(slideInterval); // Clear any existing interval
+                    slideInterval = setInterval(nextSlide, intervalTime);
+                }
+
+                /**
+                 * Goes to the next slide.
+                 */
+                function nextSlide() {
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    showSlide(currentSlide);
+                }
+
+                /**
+                 * Goes to the previous slide.
+                 */
+                function prevSlide() {
+                    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                    showSlide(currentSlide);
+                }
+
+                /**
+                 * Goes to a specific slide.
+                 * @param {number} index - Index of the slide to go to.
+                 */
+                function goToSlide(index) {
+                    clearInterval(slideInterval);
+                    showSlide(index);
+                    startSlideShow();
+                }
+
+                // Event listeners for navigation buttons
+                if (prevBtn) prevBtn.addEventListener('click', () => goToSlide((currentSlide - 1 + slides.length) % slides.length));
+                if (nextBtn) nextBtn.addEventListener('click', () => goToSlide((currentSlide + 1) % slides.length));
+
+                // Initial display and start slideshow
+                showSlide(currentSlide);
+                startSlideShow();
+            }
+
+
+            // Initialize upcoming sales carousel
+            initCarousel('upcoming-sales-carousel', 'upcomingSalesPrev', 'upcomingSalesNext', 'upcomingSalesDots', 8000, 'upcoming-sale-slide', 'upcoming-sales-carousel');
+
+
+            // ====================================================================================
+            // === LÓGICA DEL CARRITO =============================================================
+            // ====================================================================================
+
+            const CART_STORAGE_KEY = 'asg_empire_cart';
+            let cart = [];
+
+            /**
+             * Carga los elementos del carrito desde localStorage.
+             */
+            function loadCart() {
+                try {
+                    const storedCart = localStorage.getItem(CART_STORAGE_KEY);
+                    cart = storedCart ? JSON.parse(storedCart) : [];
+                    updateCartUI();
+                } catch (e) {
+                    console.error("Error al cargar el carrito desde localStorage:", e);
+                    cart = []; // Reinicia el carrito en caso de error
+                    updateCartUI();
+                }
+            }
+
+            /**
+             * Guarda los elementos del carrito en localStorage.
+             */
+            function saveCart() {
+                try {
+                    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+                    updateCartUI();
+                } catch (e) {
+                    console.error("Error al guardar el carrito en localStorage:", e);
+                }
+            }
+
+            /**
+             * Actualiza la interfaz de usuario del carrito (lista de elementos, total, recuento).
+             */
+            function updateCartUI() {
+                cartItemsContainer.innerHTML = '';
+                let total = 0;
+                let itemCount = 0;
+
+                if (cart.length === 0) {
+                    emptyCartMessage.classList.remove('hidden');
+                    cartTotalContainer.classList.add('hidden');
+                    checkoutBtn.classList.add('hidden');
+                    clearCartBtn.classList.add('hidden');
+                    cartCountElem.classList.add('hidden'); // Oculta el recuento si el carrito está vacío
+                } else {
+                    emptyCartMessage.classList.add('hidden');
+                    cartTotalContainer.classList.remove('hidden');
+                    checkoutBtn.classList.remove('hidden');
+                    clearCartBtn.classList.remove('hidden');
+                    cartCountElem.classList.remove('hidden'); // Muestra el recuento si el carrito tiene elementos
+
+                    cart.forEach(item => {
+                        const itemTotal = item.price * item.quantity;
+                        total += itemTotal;
+                        itemCount += item.quantity;
+
+                        const cartItemDiv = document.createElement('div');
+                        cartItemDiv.classList.add('cart-item');
+                        cartItemDiv.innerHTML = `
+                            <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+                            <div class="cart-item-details">
+                                <h4>${item.name}</h4>
+                                <p>S/. ${item.price.toFixed(2)} x ${item.quantity}</p>
+                            </div>
+                            <div class="cart-item-actions">
+                                <input type="number" min="1" value="${item.quantity}" data-product-id="${item.id}" class="quantity-input">
+                                <button data-product-id="${item.id}" class="remove-from-cart-btn">Eliminar</button>
+                            </div>
+                        `;
+                        cartItemsContainer.appendChild(cartItemDiv);
+                    });
+                }
+
+                cartTotalPriceElem.textContent = total.toFixed(2);
+                cartCountElem.textContent = itemCount;
+
+                // Agrega oyentes de eventos para cambiar la cantidad y los botones de eliminar
+                document.querySelectorAll('.quantity-input').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        const productId = e.target.dataset.productId;
+                        const newQuantity = parseInt(e.target.value);
+                        updateCartItemQuantity(productId, newQuantity);
+                    });
+                });
+                document.querySelectorAll('.remove-from-cart-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const productId = e.target.dataset.productId;
+                        removeCartItem(productId);
+                    });
+                });
+            }
+
+            /**
+             * Agrega un producto al carrito o actualiza su cantidad.
+             * @param {string} id
+             * @param {string} name
+             * @param {number} price
+             * @param {string} image
+             * @param {number} quantity - Cantidad a añadir.
+             */
+            function addToCart(id, name, price, image, quantity = 1) { // Añadido parámetro quantity
+                const existingItem = cart.find(item => item.id === id);
+                if (existingItem) {
+                    existingItem.quantity += quantity;
+                } else {
+                    cart.push({ id, name, price, image, quantity: quantity });
+                }
+                saveCart();
+                // Muestra el modal de confirmación de artículo añadido en lugar de la alerta
+                itemAddedMessage.textContent = `"${name}" ha sido añadido a tu carrito.`;
+                openModal(itemAddedModal);
+            }
+
+            /**
+             * Actualiza la cantidad de un producto en el carrito.
+             * @param {string} id
+             * @param {number} quantity
+             */
+            function updateCartItemQuantity(id, quantity) {
+                const itemIndex = cart.findIndex(item => item.id === id);
+                if (itemIndex !== -1) {
+                    if (quantity > 0) {
+                        cart[itemIndex].quantity = quantity;
+                    } else {
+                        cart.splice(itemIndex, 1); // Elimina si la cantidad es 0
+                    }
+                    saveCart();
+                }
+            }
+
+            /**
+             * Elimina un producto del carrito.
+             * @param {string} id
+             */
+            function removeCartItem(id) {
+                cart = cart.filter(item => item.id !== id);
+                saveCart();
+            }
+
+            /**
+             * Vacía todos los elementos del carrito.
+             */
+            clearCartBtn.addEventListener('click', async () => {
+                // Using a custom modal for confirmation instead of window.confirm
+                const confirmationModal = createConfirmationModal("¿Estás seguro de que quieres vaciar tu carrito?", () => {
+                    cart = [];
+                    saveCart();
+                    displayMessageModal("Tu carrito ha sido vaciado.");
+                    closeModal(confirmationModal);
+                });
+                openModal(confirmationModal);
+            });
+
+            // Oyente de Eventos para los botones "Añadir al Carrito" en las tarjetas de producto
+            document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = e.target.dataset.productId;
+                    const product = products.find(p => p.id === productId);
+                    if (product) {
+                        addToCart(product.id, product.name, product.price, product.image);
+                    }
+                });
+            });
+
+            // Oyente de Eventos para abrir el modal del carrito
+            cartBtn.addEventListener('click', () => {
+                updateCartUI(); // Asegura que la interfaz de usuario esté actualizada antes de abrir
+                openModal(cartModal);
+            });
+            closeCartModalBtn.addEventListener('click', () => closeModal(cartModal));
+
+            // Botón de pago en el Modal del Carrito
+            checkoutBtn.addEventListener('click', () => {
+                if (cart.length === 0) {
+                    displayMessageModal("Tu carrito está vacío. Añade productos antes de proceder al pago.");
+                    return;
+                }
+                closeModal(cartModal); // Cierra el modal del carrito
+                populatePurchaseConfirmModal(); // Rellena y abre el modal de confirmación de compra
+                openModal(purchaseConfirmModal);
+            });
+
+            /**
+             * Rellena el modal de confirmación de compra con el resumen del carrito.
+             * @param {Object} [singleProduct=null] - Un solo producto para compra directa, si aplica.
+             */
+            function populatePurchaseConfirmModal(singleProduct = null) {
+                confirmCartSummary.innerHTML = '';
+                let itemsToConfirm = singleProduct ? [singleProduct] : cart;
+                let total = 0;
+
+                if (itemsToConfirm.length === 0) {
+                    confirmCartSummary.innerHTML = '<li>No hay productos para confirmar.</li>';
+                    confirmTotalPriceElem.textContent = '0.00';
+                    return;
+                }
+
+                itemsToConfirm.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${item.name} (x${item.quantity}) - S/. ${itemTotal.toFixed(2)}`;
+                    confirmCartSummary.appendChild(listItem);
+                });
+                confirmTotalPriceElem.textContent = total.toFixed(2);
+            }
+
+            // Botones del Modal de Confirmación de Compra
+            closePurchaseConfirmModalBtn.addEventListener('click', () => closeModal(purchaseConfirmModal));
+            cancelPurchaseConfirmModalBtn.addEventListener('click', () => {
+                closeModal(purchaseConfirmModal);
+                openModal(cartModal); // Vuelve al carrito
+            });
+
+            // Envío del Formulario de Compra Final
+            purchaseConfirmForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const customerName = document.getElementById('confirmName').value;
+                const customerEmail = document.getElementById('confirmEmail').value;
+                const customerPhone = document.getElementById('confirmPhone').value;
+                const customerAddress = document.getElementById('confirmAddress').value;
+                const finalTotal = confirmTotalPriceElem.textContent;
+
+                // Simula el envío del pedido al backend para el pago y el pedido al proveedor
+                console.log("Detalles del Pedido:", {
+                    name: customerName,
+                    email: customerEmail,
+                    phone: customerPhone,
+                    address: customerAddress,
+                    items: cart, // Si se compró desde el carrito
+                    total: finalTotal
+                });
+
+                displayMessageModal(`¡Felicidades, ${customerName}! Tu pedido en ASG Empire por S/. ${finalTotal} ha sido procesado. Recibirás un correo de confirmación con los detalles de envío en breve. ¡Gracias por confiar en el futuro!`);
+
+                cart = []; // Vacía el carrito después de una compra exitosa
+                saveCart(); // Actualiza localStorage
+                closeModal(purchaseConfirmModal);
+                purchaseConfirmForm.reset();
+            });
+
+            // ====================================================================================
+            // === LÓGICA DE LA LISTA DE DESEOS ===================================================
+            // ====================================================================================
+
+            const WISHLIST_STORAGE_KEY = 'asg_empire_wishlist';
+            let wishlist = [];
+
+            /**
+             * Carga los elementos de la lista de deseos desde localStorage.
+             */
+            function loadWishlist() {
+                try {
+                    const storedWishlist = localStorage.getItem(WISHLIST_STORAGE_KEY);
+                    wishlist = storedWishlist ? JSON.parse(storedWishlist) : [];
+                    updateWishlistIcons();
+                } catch (e) {
+                    console.error("Error al cargar la lista de deseos desde localStorage:", e);
+                    wishlist = [];
+                }
+            }
+
+            /**
+             * Guarda los elementos de la lista de deseos en localStorage.
+             */
+            function saveWishlist() {
+                try {
+                    localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist));
+                    updateWishlistIcons();
+                } catch (e) {
+                    console.error("Error al guardar la lista de deseos en localStorage:", e);
+                }
+            }
+
+            /**
+             * Alterna un producto en la lista de deseos.
+             * @param {string} productId
+             * @param {HTMLElement} iconElement
+             */
+            function toggleWishlist(productId, iconElement) {
+                const product = products.find(p => p.id === productId);
+                if (!product) return;
+
+                const existingItemIndex = wishlist.findIndex(item => item.id === productId);
+
+                if (existingItemIndex !== -1) {
+                    wishlist.splice(existingItemIndex, 1);
+                    displayMessageModal(`"${product.name}" eliminado de tu lista de deseos.`);
+                } else {
+                    wishlist.push({ id: product.id, name: product.name, price: product.price, image: product.image });
+                    displayMessageModal(`"${product.name}" añadido a tu lista de deseos.`);
+                }
+                saveWishlist();
+            }
+
+            /**
+             * Actualiza el estado visual de los iconos de la lista de deseos en las tarjetas de producto.
+             */
+            function updateWishlistIcons() {
+                wishlistIcons.forEach(icon => {
+                    const productId = icon.dataset.productId;
+                    if (wishlist.some(item => item.id === productId)) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'active');
+                    } else {
+                        icon.classList.remove('fas', 'active');
+                        icon.classList.add('far');
+                    }
+                });
+                updateWishlistModalUI(); // También actualiza la interfaz de usuario del modal
+            }
+
+            /**
+             * Elimina un producto de la lista de deseos.
+             * @param {string} id
+             */
+            function removeWishlistItem(id) {
+                wishlist = wishlist.filter(item => item.id !== id);
+                saveWishlist();
+                updateWishlistModalUI(); // Actualiza el modal después de eliminar
+            }
+
+            /**
+             * Actualiza la interfaz de usuario del modal de la lista de deseos.
+             */
+            function updateWishlistModalUI() {
+                wishlistItemsContainer.innerHTML = '';
+                if (wishlist.length === 0) {
+                    emptyWishlistMessage.classList.remove('hidden');
+                    clearWishlistBtn.classList.add('hidden');
+                } else {
+                    emptyWishlistMessage.classList.add('hidden'); // Asegura que el mensaje de vacío se oculte
+                    clearWishlistBtn.classList.remove('hidden'); // Asegura que el botón de vaciar se muestre
+                    wishlist.forEach(item => {
+                        const wishlistItemDiv = document.createElement('div');
+                        wishlistItemDiv.classList.add('cart-item'); // Reutilizando el estilo de cart-item para consistencia
+                        wishlistItemDiv.innerHTML = `
+                            <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+                            <div class="cart-item-details">
+                                <h4>${item.name}</h4>
+                                <p>S/. ${item.price.toFixed(2)}</p>
+                            </div>
+                            <div class="cart-item-actions">
+                                <button data-product-id="${item.id}" class="remove-from-wishlist-btn">Eliminar</button>
+                                <button data-product-id="${item.id}" class="add-to-cart-from-wishlist-btn btn btn-primary text-xs px-2 py-1">Añadir al Carrito</button>
+                            </div>
+                        `;
+                        wishlistItemsContainer.appendChild(wishlistItemDiv);
+                    });
+                }
+
+                // Agrega oyentes de eventos para eliminar de la lista de deseos y añadir al carrito desde la lista de deseos
+                document.querySelectorAll('.remove-from-wishlist-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const productId = e.target.dataset.productId;
+                        removeWishlistItem(productId);
+                    });
+                });
+                document.querySelectorAll('.add-to-cart-from-wishlist-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const productId = e.target.dataset.productId;
+                        const product = products.find(p => p.id === productId);
+                        if (product) {
+                            addToCart(product.id, product.name, product.price, product.image);
+                            removeWishlistItem(productId); // Elimina de la lista de deseos después de añadir al carrito
+                        }
+                    });
+                });
+            }
+
+            /**
+             * Vacía todos los elementos de la lista de deseos.
+             */
+            clearWishlistBtn.addEventListener('click', () => {
+                // Using a custom modal for confirmation instead of window.confirm
+                const confirmationModal = createConfirmationModal("¿Estás seguro de que quieres vaciar tu lista de deseos?", () => {
+                    wishlist = [];
+                    saveWishlist();
+                    updateWishlistModalUI();
+                    displayMessageModal("Tu lista de deseos ha sido vaciada.");
+                    closeModal(confirmationModal);
+                });
+                openModal(confirmationModal);
+            });
+
+            // Oyente de Eventos para los iconos de la lista de deseos en las tarjetas de producto
+            wishlistIcons.forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    const productId = e.target.dataset.productId;
+                    toggleWishlist(productId, e.target);
+                });
+            });
+
+            // Oyente de Eventos para abrir el modal de la lista de deseos (añade un botón en el encabezado o en otro lugar si es necesario)
+            // Por ahora, haremos que el logo de ASG Empire en el encabezado abra la lista de deseos para fines de demostración
+            // document.querySelector('.header .logo').addEventListener('click', () => {
+            //      updateWishlistModalUI(); // Asegura que la interfaz de usuario esté actualizada antes de abrir
+            //      openModal(wishlistModal);
+            // });
+            closeWishlistModalBtn.addEventListener('click', () => closeModal(wishlistModal));
+
+
+            // ====================================================================================
+            // === LÓGICA DEL MODAL DE DETALLES DEL PRODUCTO ======================================
+            // ====================================================================================
+
+            let currentProduct = null; // Para almacenar el producto actualmente visualizado en el modal
+            let productImageCarouselInstance = null; // To store the carousel instance for product images
+
+            /**
+             * Muestra el modal de detalles del producto con la información del producto dado.
+             * @param {string} productId
+             */
+            function showProductDetail(productId) {
+                const product = products.find(p => p.id === productId);
+                if (!product) {
+                    console.error('Producto no encontrado:', productId);
+                    return;
+                }
+
+                currentProduct = product; // Guarda el producto actual
+
+                // Populate product details
+                productDetailTitle.textContent = product.name;
+                productDetailPrice.textContent = `S/. ${product.price.toFixed(2)}`;
+                productDetailDescription.textContent = product.description;
+                productQuantityInput.value = 1; // Reset quantity to 1 every time modal opens
+
+                // Load product images into the carousel
+                const allProductImages = [product.image, ...product.galleryImages];
+                const carouselSlidesContainer = document.querySelector('#productImageCarousel .carousel-slides-container');
+                carouselSlidesContainer.innerHTML = ''; // Clear existing slides
+
+                allProductImages.forEach(imageUrl => {
+                    const slideDiv = document.createElement('div');
+                    slideDiv.classList.add('carousel-slide');
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.alt = product.name;
+                    slideDiv.appendChild(img);
+                    carouselSlidesContainer.appendChild(slideDiv);
+                });
+
+                // Initialize the product image carousel
+                // Destroy previous instance if it exists to prevent multiple listeners
+                if (productImageCarouselInstance) {
+                    // Assuming initCarousel returns an object with a destroy method or cleans up internally
+                    // For this simple carousel, re-initializing will overwrite the event listeners.
+                    // If it were a more complex library, a proper destroy method would be needed.
+                }
+                initCarousel('productImageCarousel', 'productImagePrev', 'productImageNext', 'productImageDots', 5000, 'carousel-slide', 'carousel-slides-container');
+
+
+                // Cargar especificaciones
+                productDetailSpecsList.innerHTML = '';
+                product.specs.forEach(spec => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<i class="fas fa-check-circle"></i> ${spec}`;
+                    productDetailSpecsList.appendChild(li);
+                });
+
+                // Cargar reseñas desde Firestore
+                fetchAndDisplayReviews(product.id);
+
+                // Configurar botones de acción
+                addToCartFromDetailBtn.onclick = () => {
+                    const quantity = parseInt(productQuantityInput.value);
+                    addToCart(product.id, product.name, product.price, product.image, quantity);
+                    closeModal(productDetailModal);
+                };
+                buyNowBtn.onclick = () => {
+                    closeModal(productDetailModal);
+                    const quantity = parseInt(productQuantityInput.value);
+                    // Prepara un "carrito" temporal con solo este producto para la compra directa
+                    populatePurchaseConfirmModal({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: quantity });
+                    openModal(purchaseConfirmModal);
+                };
+
+                openModal(productDetailModal);
+            }
+
+            // Quantity selector event listeners
+            decreaseQuantityBtn.addEventListener('click', () => {
+                let currentQuantity = parseInt(productQuantityInput.value);
+                if (currentQuantity > 1) {
+                    productQuantityInput.value = currentQuantity - 1;
+                }
+            });
+
+            increaseQuantityBtn.addEventListener('click', () => {
+                let currentQuantity = parseInt(productQuantityInput.value);
+                productQuantityInput.value = currentQuantity + 1;
+            });
+
+            productQuantityInput.addEventListener('change', () => {
+                let currentQuantity = parseInt(productQuantityInput.value);
+                if (currentQuantity < 1 || isNaN(currentQuantity)) {
+                    productQuantityInput.value = 1;
+                }
+            });
+
+            /**
+             * Fetches and displays reviews for a given product ID from Firestore.
+             * Sets up a real-time listener using onSnapshot.
+             * @param {string} productId
+             */
+            function fetchAndDisplayReviews(productId) {
+                if (!isAuthReady) {
+                    console.warn("Authentication not ready, cannot fetch reviews yet.");
+                    reviewsList.innerHTML = `<p class="empty-cart-message">Cargando reseñas...</p>`;
+                    return;
+                }
+
+                const reviewsColRef = firebase.collection(db, `artifacts/${appId}/public/data/product_reviews`);
+                const q = firebase.query(reviewsColRef, firebase.where("productId", "==", productId));
+
+                // Detach previous listener if any
+                if (currentReviewsUnsubscribe) {
+                    currentReviewsUnsubscribe();
+                }
+
+                currentReviewsUnsubscribe = firebase.onSnapshot(q, (snapshot) => {
+                    const reviews = [];
+                    let totalRating = 0;
+                    snapshot.forEach((doc) => {
+                        const reviewData = doc.data();
+                        reviews.push(reviewData);
+                        totalRating += reviewData.rating;
+                    });
+
+                    // Update average rating for the product detail modal
+                    const avgRating = reviews.length > 0 ? (totalRating / reviews.length) : 0;
+                    productDetailRating.innerHTML = generateStarRating(avgRating);
+
+                    displayReviews(reviews); // Reuse existing displayReviews function
+                }, (error) => {
+                    console.error("Error fetching reviews:", error);
+                    reviewsList.innerHTML = `<p class="text-red-500">Error al cargar reseñas: ${error.message}</p>`;
+                });
+            }
+
+
+            /**
+             * Genera el HTML para la calificación de estrellas.
+             * @param {number} rating - La calificación numérica (ej. 4.5).
+             * @returns {string} HTML de estrellas.
+             */
+            function generateStarRating(rating) {
+                let starsHtml = '';
+                const fullStars = Math.floor(rating);
+                const hasHalfStar = rating % 1 !== 0;
+
+                for (let i = 0; i < fullStars; i++) {
+                    starsHtml += '<i class="fas fa-star"></i>';
+                }
+                if (hasHalfStar) {
+                    starsHtml += '<i class="fas fa-star-half-alt"></i>';
+                }
+                for (let i = 0; i < (5 - fullStars - (hasHalfStar ? 1 : 0)); i++) {
+                    starsHtml += '<i class="far fa-star"></i>';
+                }
+                starsHtml += ` (${rating.toFixed(1)}/5)`;
+                return starsHtml;
+            }
+
+            /**
+             * Muestra la lista de reseñas para un producto.
+             * @param {Array<Object>} reviews - Array de objetos de reseña.
+             */
+            function displayReviews(reviews) {
+                reviewsList.innerHTML = '';
+                if (reviews.length === 0) {
+                    noReviewsMessage.classList.remove('hidden');
+                } else {
+                    noReviewsMessage.classList.add('hidden');
+                    // Sort reviews by timestamp in descending order (newest first)
+                    const sortedReviews = [...reviews].sort((a, b) => {
+                        // Handle cases where timestamp might be null (e.g., during initial write before serverTimestamp is set)
+                        const timeA = a.timestamp ? a.timestamp.toDate().getTime() : 0;
+                        const timeB = b.timestamp ? b.timestamp.toDate().getTime() : 0;
+                        return timeB - timeA;
+                    });
+
+                    sortedReviews.forEach(review => {
+                        const reviewItem = document.createElement('div');
+                        reviewItem.classList.add('review-item');
+                        reviewItem.innerHTML = `
+                            <strong>${review.name}</strong>
+                            <span class="rating-stars">${generateStarRating(review.rating)}</span>
+                            <p>${review.comment}</p>
+                        `;
+                        reviewsList.appendChild(reviewItem);
+                    });
+                }
+            }
+
+            // Oyentes de Eventos para los botones "Ver Detalles"
+            document.querySelectorAll('.view-details-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = e.target.dataset.productId;
+                    showProductDetail(productId);
+                });
+            });
+
+            // Oyente de Eventos para cerrar el modal de detalles del producto
+            closeProductDetailModalBtn.addEventListener('click', () => {
+                closeModal(productDetailModal);
+                // Detach the Firestore listener when the modal is closed
+                if (currentReviewsUnsubscribe) {
+                    currentReviewsUnsubscribe();
+                    currentReviewsUnsubscribe = null;
+                }
+            });
+
+            // Manejar el envío del formulario de reseña
+            addReviewForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentProduct || !isAuthReady) {
+                    console.warn("Cannot add review: product not selected or authentication not ready.");
+                    displayMessageModal('Error: No se puede añadir la reseña en este momento. Inténtalo de nuevo más tarde.');
+                    return;
+                }
+
+                const reviewerName = reviewerNameInput.value.trim();
+                const reviewRating = parseInt(reviewRatingInput.value);
+                const reviewComment = reviewCommentInput.value.trim();
+
+                if (reviewerName && reviewRating && reviewComment) {
+                    try {
+                        const reviewsColRef = firebase.collection(db, `artifacts/${appId}/public/data/product_reviews`);
+                        await firebase.addDoc(reviewsColRef, {
+                            productId: currentProduct.id,
+                            name: reviewerName,
+                            rating: reviewRating,
+                            comment: reviewComment,
+                            userId: userId, // Store the user ID
+                            timestamp: firebase.serverTimestamp() // Store server timestamp
+                        });
+
+                        // Limpiar el formulario
+                        addReviewForm.reset();
+                        displayMessageModal('¡Gracias por tu reseña! Se ha enviado correctamente.');
+                    } catch (error) {
+                        console.error("Error adding review:", error);
+                        displayMessageModal(`Error al enviar la reseña: ${error.message}`);
+                    }
+                } else {
+                    displayMessageModal('Por favor, completa todos los campos de la reseña.');
+                }
+            });
+
+
+            // ====================================================================================
+            // === LÓGICA DEL ACORDEÓN DE PREGUNTAS FRECUENTES ====================================
+            // ====================================================================================
+
+            document.querySelectorAll('.faq-question').forEach(question => {
+                question.addEventListener('click', () => {
+                    const answer = question.nextElementSibling;
+                    const icon = question.querySelector('.faq-toggle-icon');
+
+                    // Cierra todas las demás respuestas abiertas
+                    document.querySelectorAll('.faq-answer.active').forEach(openAnswer => {
+                        if (openAnswer !== answer) {
+                            openAnswer.classList.remove('active');
+                            openAnswer.previousElementSibling.querySelector('.faq-toggle-icon').classList.remove('rotated');
+                            openAnswer.style.borderTop = 'none';
+                            openAnswer.style.paddingTop = '0';
+                        }
+                    });
+
+                    // Alterna la respuesta actual
+                    answer.classList.toggle('active');
+                    icon.classList.toggle('rotated');
+
+                    // Agrega/elimina el borde superior y el padding superior para la respuesta actual
+                    if (answer.classList.contains('active')) {
+                        answer.style.borderTop = '1px dashed #4a5568'; /* Borde más oscuro */
+                        answer.style.paddingTop = '0.8rem';
+                    } else {
+                        answer.style.borderTop = 'none';
+                        answer.style.paddingTop = '0';
+                    }
+                });
+            });
+
+            // ====================================================================================
+            // === LÓGICA DEL BOTÓN VOLVER ARRIBA =================================================
+            // ====================================================================================
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) { // Muestra el botón después de 300px de scroll
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            });
+
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth' // Desplazamiento suave
+                });
+            });
+
+            // ====================================================================================
+            // === LÓGICA DE MODALES PERSONALIZADOS (reemplazo de alert/confirm) =================
+            // ====================================================================================
+
+            /**
+             * Crea y muestra un modal de mensaje personalizado.
+             * @param {string} message - El mensaje a mostrar.
+             * @param {string} [title="Información"] - El título del modal.
+             */
+            function displayMessageModal(message, title = "Información") {
+                let messageModal = document.getElementById('customMessageModal');
+                if (!messageModal) {
+                    messageModal = document.createElement('div');
+                    messageModal.id = 'customMessageModal';
+                    messageModal.classList.add('modal-overlay', 'hidden');
+                    messageModal.innerHTML = `
+                        <div class="modal-content">
+                            <button class="modal-close-btn">&times;</button>
+                            <h3 class="modal-title"></h3>
+                            <p class="modal-description"></p>
+                            <div class="modal-buttons justify-center">
+                                <button class="btn btn-primary close-btn">Aceptar</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(messageModal);
+
+                    messageModal.querySelector('.modal-close-btn').addEventListener('click', () => closeModal(messageModal));
+                    messageModal.querySelector('.close-btn').addEventListener('click', () => closeModal(messageModal));
+                }
+                messageModal.querySelector('.modal-title').textContent = title;
+                messageModal.querySelector('.modal-description').textContent = message;
+                openModal(messageModal);
+            }
+
+            /**
+             * Crea y muestra un modal de confirmación personalizado.
+             * @param {string} message - El mensaje de confirmación.
+             * @param {Function} onConfirm - Función a ejecutar si se confirma.
+             * @param {string} [title="Confirmación"] - El título del modal.
+             */
+            function createConfirmationModal(message, onConfirm, title = "Confirmación") {
+                let confirmationModal = document.getElementById('customConfirmationModal');
+                if (!confirmationModal) {
+                    confirmationModal = document.createElement('div');
+                    confirmationModal.id = 'customConfirmationModal';
+                    confirmationModal.classList.add('modal-overlay', 'hidden');
+                    confirmationModal.innerHTML = `
+                        <div class="modal-content">
+                            <button class="modal-close-btn">&times;</button>
+                            <h3 class="modal-title"></h3>
+                            <p class="modal-description"></p>
+                            <div class="modal-buttons">
+                                <button class="btn btn-primary confirm-btn">Sí</button>
+                                <button class="btn btn-secondary cancel-btn">No</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(confirmationModal);
+                }
+
+                confirmationModal.querySelector('.modal-title').textContent = title;
+                confirmationModal.querySelector('.modal-description').textContent = message;
+
+                const confirmBtn = confirmationModal.querySelector('.confirm-btn');
+                const cancelBtn = confirmationModal.querySelector('.cancel-btn');
+                const closeBtn = confirmationModal.querySelector('.modal-close-btn');
+
+                // Clear previous listeners
+                confirmBtn.onclick = null;
+                cancelBtn.onclick = null;
+                closeBtn.onclick = null;
+
+                confirmBtn.onclick = () => {
+                    onConfirm();
+                    closeModal(confirmationModal);
+                };
+                cancelBtn.onclick = () => closeModal(confirmationModal);
+                closeBtn.onclick = () => closeModal(confirmationModal);
+
+                return confirmationModal;
+            }
+
+            // ====================================================================================
+            // === NUEVA LÓGICA DE ENCABEZADO Y BÚSQUEDA =========================================
+            // ====================================================================================
+
+            // Logo click to refresh page
+            headerLogo.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent default link behavior
+                window.location.reload(); // Reload the current page
+            });
+
+            /**
+             * Handles the product search functionality.
+             */
+            function handleProductSearch() {
+                const query = searchInput.value.trim().toLowerCase();
+                if (!query) {
+                    displayMessageModal("Por favor, introduce un término de búsqueda.", "Búsqueda Vacía");
+                    return;
+                }
+
+                const foundProduct = products.find(p => p.name.toLowerCase().includes(query));
+
+                if (foundProduct) {
+                    showProductDetail(foundProduct.id);
+                } else {
+                    displayMessageModal(`No se encontraron productos que coincidan con "${query}". Por favor, intenta con otro término.`, "Sin Resultados");
+                }
+            }
+
+            // Event listeners for search
+            searchBtn.addEventListener('click', handleProductSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleProductSearch();
+                }
+            });
+
+
+            loadCart(); // Carga el carrito al cargar la página
+            loadWishlist(); // Carga la lista de deseos al cargar la página
+        };
+    </script>
+</body>
+</html>

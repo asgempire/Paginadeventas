@@ -742,11 +742,22 @@
         }
         /* Ajuste específico para el modal de Confirmación de Compra */
         #purchaseConfirmModal .modal-content {
-            max-width: 550px; /* Hacemos este modal más ancho */
-            padding: 2rem; /* Reducimos el padding para hacerlo más corto visualmente */
+            max-width: 700px; /* Aumentado para ser más ancho */
+            padding: 1.8rem; /* Ligeramente reducido para hacerlo más compacto */
         }
         #purchaseConfirmModal .modal-form-group {
-            margin-bottom: 1rem; /* Reducimos el margen entre los grupos de formulario */
+            margin-bottom: 0.8rem; /* Reducimos el margen entre los grupos de formulario */
+        }
+        /* Estilos para el mensaje de advertencia */
+        #purchaseConfirmModal .warning-message {
+            color: #f6ad55; /* Naranja para advertencia */
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 1.2rem; /* Ajustado para más espacio */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         /* Estilos para el Modal de Detalles del Producto */
@@ -1249,6 +1260,14 @@
         #backToTopBtn.show {
             display: flex;
             opacity: 1;
+        }
+        /* Estilos para el mensaje de error de validación */
+        .error-message {
+            color: #ef4444; /* Rojo */
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
+            text-align: left;
+            display: block;
         }
     </style>
 </head>
@@ -1767,6 +1786,11 @@
         <div class="modal-content">
             <button class="modal-close-btn" id="closePurchaseConfirmModalBtn">&times;</button>
             <h3>Confirmar Tu Pedido</h3>
+            <!-- Mensaje de advertencia -->
+            <p class="warning-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                Ingresar datos correctos, el vendedor no se hará responsable del mal colocamiento de Dirección o Correo Electrónico.
+            </p>
             <form id="purchaseConfirmForm">
                 <div class="modal-form-group">
                     <label for="confirmName">Nombre Completo:</label>
@@ -1775,6 +1799,7 @@
                 <div class="modal-form-group">
                     <label for="confirmEmail">Correo Electrónico:</label>
                     <input type="email" id="confirmEmail" placeholder="tu@ejemplo.com" required>
+                    <span id="emailError" class="error-message hidden">Por favor, ingresa un correo electrónico válido (ej. @gmail.com, @hotmail.com, @outlook.com).</span>
                 </div>
                 <div class="modal-form-group">
                     <label for="confirmPhone">Teléfono (Opcional):</label>
@@ -1933,6 +1958,8 @@
             const purchaseConfirmForm = document.getElementById('purchaseConfirmForm');
             const confirmCartSummary = document.getElementById('confirmCartSummary');
             const confirmTotalPriceElem = document.getElementById('confirmTotalPrice');
+            const confirmEmailInput = document.getElementById('confirmEmail'); // Nuevo
+            const emailErrorSpan = document.getElementById('emailError'); // Nuevo
 
             const wishlistModal = document.getElementById('wishlistModal');
             const closeWishlistModalBtn = document.getElementById('closeWishlistModalBtn');
@@ -1971,12 +1998,12 @@
             // Firebase Initialization
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-                apiKey: "YOUR_API_KEY", // Replace with your Firebase project's API key
-                authDomain: "YOUR_AUTH_DOMAIN",
-                projectId: "YOUR_PROJECT_ID",
-                storageBucket: "YOUR_STORAGE_BUCKET",
-                messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-                appId: "YOUR_APP_ID"
+                apiKey: "AIzaSyBm_ek0maKEIaXUwxOiz05d2CJyru6d3i4",
+                authDomain: "controldropshipping-371b2.firebaseapp.com",
+                projectId: "controldropshipping-371b2",
+                storageBucket: "controldropshipping-371b2.firebasestorage.app",
+                messagingSenderId: "397126268543",
+                appId: "1:397126268543:web:73dfba2a7781270af9314a"
             };
 
             const app = firebase.initializeApp(firebaseConfig);
@@ -2285,6 +2312,13 @@
             viewCartFromAddedModal.addEventListener('click', () => {
                 closeModal(itemAddedModal);
                 openModal(cartModal);
+            });
+
+            // Cerrar modal al hacer clic fuera del contenido
+            itemAddedModal.addEventListener('click', (e) => {
+                if (e.target === itemAddedModal) {
+                    closeModal(itemAddedModal);
+                }
             });
 
 
@@ -2603,6 +2637,13 @@
             });
             closeCartModalBtn.addEventListener('click', () => closeModal(cartModal));
 
+            // Cerrar modal al hacer clic fuera del contenido
+            cartModal.addEventListener('click', (e) => {
+                if (e.target === cartModal) {
+                    closeModal(cartModal);
+                }
+            });
+
             // Botón de pago en el Modal del Carrito
             checkoutBtn.addEventListener('click', () => {
                 if (cart.length === 0) {
@@ -2646,28 +2687,88 @@
                 openModal(cartModal); // Vuelve al carrito
             });
 
+            // Cerrar modal al hacer clic fuera del contenido
+            purchaseConfirmModal.addEventListener('click', (e) => {
+                if (e.target === purchaseConfirmModal) {
+                    closeModal(purchaseConfirmModal);
+                }
+            });
+
+            // Validación de correo electrónico
+            confirmEmailInput.addEventListener('input', () => {
+                const email = confirmEmailInput.value;
+                // Updated regex to allow more common top-level domains and subdomains
+                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/;
+                const allowedDomains = [
+                    'gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'aol.com',
+                    'icloud.com', 'protonmail.com', 'zoho.com', 'yandex.com', 'gmx.com',
+                    'mail.com', 'live.com', 'msn.com', 'googlemail.com', 'outlook.es',
+                    'hotmail.es', 'yahoo.es', 'mail.es'
+                ];
+
+                const domain = email.substring(email.indexOf('@') + 1).toLowerCase();
+
+                if (!emailPattern.test(email) || !allowedDomains.includes(domain)) {
+                    emailErrorSpan.classList.remove('hidden');
+                } else {
+                    emailErrorSpan.classList.add('hidden');
+                }
+            });
+
             // Envío del Formulario de Compra Final
             purchaseConfirmForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+
+                // Re-validar el email antes de enviar
+                const email = confirmEmailInput.value;
+                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/;
+                const allowedDomains = [
+                    'gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'aol.com',
+                    'icloud.com', 'protonmail.com', 'zoho.com', 'yandex.com', 'gmx.com',
+                    'mail.com', 'live.com', 'msn.com', 'googlemail.com', 'outlook.es',
+                    'hotmail.es', 'yahoo.es', 'mail.es'
+                ];
+                const domain = email.substring(email.indexOf('@') + 1).toLowerCase();
+
+                if (!emailPattern.test(email) || !allowedDomains.includes(domain)) {
+                    emailErrorSpan.classList.remove('hidden');
+                    displayMessageModal("Por favor, ingresa un correo electrónico válido con un dominio común (ej. @gmail.com, @hotmail.com, @outlook.com).", "Error de Validación");
+                    return; // Detener el envío si el email no es válido
+                } else {
+                    emailErrorSpan.classList.add('hidden');
+                }
+
                 const customerName = document.getElementById('confirmName').value;
                 const customerEmail = document.getElementById('confirmEmail').value;
                 const customerPhone = document.getElementById('confirmPhone').value;
                 const customerAddress = document.getElementById('confirmAddress').value;
                 const finalTotal = confirmTotalPriceElem.textContent;
 
-                // Simula el envío del pedido al backend para el pago y el pedido al proveedor
-                console.log("Detalles del Pedido:", {
-                    name: customerName,
-                    email: customerEmail,
-                    phone: customerPhone,
-                    address: customerAddress,
-                    items: cart, // Si se compró desde el carrito
-                    total: finalTotal
+                // Construir el mensaje de WhatsApp
+                let whatsappMessage = `Hola ASG Empire, quisiera más información de este pedido.\n\n`;
+                whatsappMessage += `Mi información es:\n`;
+                whatsappMessage += `Nombre: ${customerName}\n`;
+                whatsappMessage += `Email: ${customerEmail}\n`;
+                whatsappMessage += `Teléfono: ${customerPhone || 'No proporcionado'}\n`;
+                whatsappMessage += `Dirección: ${customerAddress}\n\n`;
+                whatsappMessage += `Detalles del Pedido:\n`;
+
+                let itemsToConfirm = currentProduct ? [{ ...currentProduct, quantity: parseInt(productQuantityInput.value) }] : cart;
+
+                itemsToConfirm.forEach(item => {
+                    whatsappMessage += `- ${item.name} (x${item.quantity}) - S/. ${(item.price * item.quantity).toFixed(2)}\n`;
                 });
+                whatsappMessage += `\nTotal a Pagar: S/. ${finalTotal}\n`;
 
-                displayMessageModal(`¡Felicidades, ${customerName}! Tu pedido en ASG Empire por S/. ${finalTotal} ha sido procesado. Recibirás un correo de confirmación con los detalles de envío en breve. ¡Gracias por confiar en el futuro!`);
+                // URL-encode the message
+                const encodedMessage = encodeURIComponent(whatsappMessage);
+                const whatsappUrl = `https://api.whatsapp.com/send?phone=+51952350539&text=${encodedMessage}`;
 
-                cart = []; // Vacía el carrito después de una compra exitosa
+                // Redirigir al usuario a WhatsApp
+                window.location.href = whatsappUrl;
+
+                // Después de la redirección, vaciar el carrito y cerrar el modal
+                cart = [];
                 saveCart(); // Actualiza localStorage
                 closeModal(purchaseConfirmModal);
                 purchaseConfirmForm.reset();
@@ -2832,6 +2933,13 @@
             //      openModal(wishlistModal);
             // });
             closeWishlistModalBtn.addEventListener('click', () => closeModal(wishlistModal));
+
+            // Cerrar modal al hacer clic fuera del contenido
+            wishlistModal.addEventListener('click', (e) => {
+                if (e.target === wishlistModal) {
+                    closeModal(wishlistModal);
+                }
+            });
 
 
             // ====================================================================================
@@ -3046,6 +3154,13 @@
                 }
             });
 
+            // Cerrar modal al hacer clic fuera del contenido
+            productDetailModal.addEventListener('click', (e) => {
+                if (e.target === productDetailModal) {
+                    closeModal(productDetailModal);
+                }
+            });
+
             // Manejar el envío del formulario de reseña
             addReviewForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -3166,6 +3281,12 @@
 
                     messageModal.querySelector('.modal-close-btn').addEventListener('click', () => closeModal(messageModal));
                     messageModal.querySelector('.close-btn').addEventListener('click', () => closeModal(messageModal));
+                    // Cerrar modal al hacer clic fuera del contenido
+                    messageModal.addEventListener('click', (e) => {
+                        if (e.target === messageModal) {
+                            closeModal(messageModal);
+                        }
+                    });
                 }
                 messageModal.querySelector('.modal-title').textContent = title;
                 messageModal.querySelector('.modal-description').textContent = message;
@@ -3216,6 +3337,13 @@
                 };
                 cancelBtn.onclick = () => closeModal(confirmationModal);
                 closeBtn.onclick = () => closeModal(confirmationModal);
+
+                // Cerrar modal al hacer clic fuera del contenido
+                confirmationModal.addEventListener('click', (e) => {
+                    if (e.target === confirmationModal) {
+                        closeModal(confirmationModal);
+                    }
+                });
 
                 return confirmationModal;
             }

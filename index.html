@@ -926,12 +926,38 @@
             align-items: center;
             gap: 0.5rem;
         }
-        .cart-item-actions input {
-            background-color: #1a202c; /* Fondo oscuro para input de cantidad */
-            color: #e2e8f0; /* Texto claro */
-            border: 1px solid #4a5568;
+        /* Specific styles for quantity input in cart modal */
+        .cart-item-actions .quantity-input {
+            background-color: #2d3748; /* Darker background for input */
+            color: #e2e8f0; /* Light text color */
+            border: 1px solid #4a5568; /* Darker border */
+            border-radius: 0.4rem;
+            width: 50px; /* Fixed width for quantity input */
+            text-align: center; /* Center the number */
+            padding: 0.4rem 0.2rem; /* Adjust padding */
+            -moz-appearance: textfield; /* Firefox: hide default spinners */
+            appearance: textfield; /* Chrome, Safari, Edge: hide default spinners */
         }
-        .cart-item-actions button {
+        .cart-item-actions .quantity-input::-webkit-inner-spin-button,
+        .cart-item-actions .quantity-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .cart-item-actions .quantity-btn { /* New style for quantity +/- buttons */
+            background-color: #4a5568;
+            color: #e2e8f0;
+            padding: 0.4rem 0.7rem;
+            border-radius: 0.4rem;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .cart-item-actions .quantity-btn:hover {
+            background-color: #6366f1;
+        }
+
+        .cart-item-actions .remove-from-cart-btn {
             background-color: #ef4444;
             color: white;
             padding: 0.4rem 0.7rem;
@@ -939,7 +965,7 @@
             font-size: 0.85rem;
             transition: background-color 0.2s;
         }
-        .cart-item-actions button:hover {
+        .cart-item-actions .remove-from-cart-btn:hover {
             background-color: #dc2626;
         }
         .cart-total {
@@ -1902,7 +1928,7 @@
             const cartCountElem = document.getElementById('cartCount');
 
             const purchaseConfirmModal = document.getElementById('purchaseConfirmModal');
-            const closePurchaseConfirmModalBtn = document.getElementById('closePurchaseConfirmModalBtn');
+            const closePurchaseConfirmModalBtn = document = document.getElementById('closePurchaseConfirmModalBtn');
             const cancelPurchaseConfirmModalBtn = document.getElementById('cancelPurchaseConfirmModalBtn');
             const purchaseConfirmForm = document.getElementById('purchaseConfirmForm');
             const confirmCartSummary = document.getElementById('confirmCartSummary');
@@ -2407,7 +2433,8 @@
                 try {
                     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
                     updateCartUI();
-                } catch (e) {
+                }
+                catch (e) {
                     console.error("Error al guardar el carrito en localStorage:", e);
                 }
             }
@@ -2444,10 +2471,12 @@
                             <img src="${item.image}" alt="${item.name}" class="cart-item-image">
                             <div class="cart-item-details">
                                 <h4>${item.name}</h4>
-                                <p>S/. ${item.price.toFixed(2)} x ${item.quantity}</p>
+                                <p>S/. ${item.price.toFixed(2)}</p>
                             </div>
                             <div class="cart-item-actions">
+                                <button data-product-id="${item.id}" class="quantity-btn decrease-quantity-btn">-</button>
                                 <input type="number" min="1" value="${item.quantity}" data-product-id="${item.id}" class="quantity-input">
+                                <button data-product-id="${item.id}" class="quantity-btn increase-quantity-btn">+</button>
                                 <button data-product-id="${item.id}" class="remove-from-cart-btn">Eliminar</button>
                             </div>
                         `;
@@ -2470,6 +2499,27 @@
                     button.addEventListener('click', (e) => {
                         const productId = e.target.dataset.productId;
                         removeCartItem(productId);
+                    });
+                });
+                // New: Add event listeners for custom quantity buttons
+                document.querySelectorAll('.decrease-quantity-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const productId = e.target.dataset.productId;
+                        const quantityInput = cartItemsContainer.querySelector(`.quantity-input[data-product-id="${productId}"]`);
+                        let currentQuantity = parseInt(quantityInput.value);
+                        if (currentQuantity > 1) {
+                            quantityInput.value = currentQuantity - 1;
+                            updateCartItemQuantity(productId, currentQuantity - 1);
+                        }
+                    });
+                });
+                document.querySelectorAll('.increase-quantity-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const productId = e.target.dataset.productId;
+                        const quantityInput = cartItemsContainer.querySelector(`.quantity-input[data-product-id="${productId}"]`);
+                        let currentQuantity = parseInt(quantityInput.value);
+                        quantityInput.value = currentQuantity + 1;
+                        updateCartItemQuantity(productId, currentQuantity + 1);
                     });
                 });
             }
